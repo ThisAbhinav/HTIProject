@@ -1,27 +1,24 @@
+﻿using GoogleTextToSpeech.Scripts;
+using GoogleTextToSpeech.Scripts.Data;
+using Newtonsoft.Json;
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System;
-using GoogleTextToSpeech.Scripts.Data;
-using GoogleTextToSpeech.Scripts;
 
 [System.Serializable]
-public class UnityAndGeminiKey
+public class GeminiResponse
 {
-    public string key;
+    public List<Candidate> candidates;
 }
 
 [System.Serializable]
 public class Response
 {
     public Candidate[] candidates;
-}
-
-public class ChatRequest
-{
-    public Content[] contents;
 }
 
 [System.Serializable]
@@ -34,7 +31,7 @@ public class Candidate
 public class Content
 {
     public string role;
-    public Part[] parts;
+    public List<Part> parts;
 }
 
 [System.Serializable]
@@ -43,42 +40,26 @@ public class Part
     public string text;
 }
 
+public class ChatRequest
+{
+    public List<Content> contents;
+}
+
 public class UnityAndGeminiV3 : MonoBehaviour
 {
     [Header("Gemini API Password")]
     public string apiKey;
-    private string apiEndpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent";
+    private string apiEndpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
     [Header("NPC Function")]
     [SerializeField] private TextToSpeechManager googleServices;
     [SerializeField] private ChatManager chatManager;
 
-    private Content[] chatHistory;
+
+    private List<Content> chatHistory = new List<Content>();
     private bool isProcessing = false;
 
-    void Start()
-    {
-        chatHistory = new Content[] { };
 
-        // Subscribe to chat manager events
-        if (chatManager != null)
-        {
-            ChatManager.OnUserMessage += HandleUserMessage;
-        }
-    }
-
-    private void OnDestroy()
-    {
-        // Unsubscribe from events
-        ChatManager.OnUserMessage -= HandleUserMessage;
-    }
-
-    private void HandleUserMessage(string message)
-    {
-        SendChat(message);
-    }
-
-    // Functions for sending a new prompt, or a chat to Gemini
     private IEnumerator SendPromptRequestToGemini(string promptText)
     {
         string url = $"{apiEndpoint}?key={apiKey}";
@@ -108,17 +89,15 @@ public class UnityAndGeminiV3 : MonoBehaviour
             {
                 Debug.Log("Request complete!");
                 Response response = JsonUtility.FromJson<Response>(www.downloadHandler.text);
-                if (response.candidates.Length > 0 && response.candidates[0].content.parts.Length > 0)
+
+                // ✅ Corrected line below
+                if (response.candidates != null && response.candidates.Length > 0 &&
+                    response.candidates[0].content.parts != null && response.candidates[0].content.parts.Count > 0)
                 {
-                    //This is the response to your request
                     string text = response.candidates[0].content.parts[0].text;
                     Debug.Log(text);
 
-                    // Add AI response to chat
-                    if (chatManager != null)
-                    {
-                        chatManager.AddAIMessage(text);
-                    }
+                    chatManager?.AddAIMessage(text);
                 }
                 else
                 {
@@ -131,62 +110,60 @@ public class UnityAndGeminiV3 : MonoBehaviour
             }
         }
     }
+    void Start()
+    {
+        if (chatManager != null)
+        {
+            ChatManager.OnUserMessage += HandleUserMessage;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        ChatManager.OnUserMessage -= HandleUserMessage;
+    }
+
+    private void HandleUserMessage(string message)
+    {
+        SendChat(message);
+    }
 
     public void SendChat(string userMessage)
     {
         if (isProcessing)
         {
-            if (chatManager != null)
-            {
-                chatManager.AddSystemMessage("Please wait for the current response to complete.");
-            }
+            chatManager?.AddSystemMessage("Please wait for the current response to complete.");
             return;
         }
 
-        if (string.IsNullOrEmpty(userMessage.Trim()))
+        if (string.IsNullOrWhiteSpace(userMessage))
         {
-            if (chatManager != null)
-            {
-                chatManager.AddSystemMessage("Message cannot be empty.");
-            }
+            chatManager?.AddSystemMessage("Message cannot be empty.");
             return;
         }
 
         StartCoroutine(SendChatRequestToGemini(userMessage));
     }
-
     private IEnumerator SendChatRequestToGemini(string newMessage)
     {
         isProcessing = true;
-
-        // Show that AI is thinking
-        if (chatManager != null)
-        {
-            chatManager.AddSystemMessage("AI is thinking...");
-        }
+        chatManager?.AddSystemMessage("AI is thinking...");
 
         string url = $"{apiEndpoint}?key={apiKey}";
 
+        // Build user message
         Content userContent = new Content
         {
             role = "user",
-            parts = new Part[]
-            {
-                new Part { text = newMessage }
-            }
+            parts = new List<Part> { new Part { text = newMessage } }
         };
-
-        List<Content> contentsList = new List<Content>(chatHistory);
-        contentsList.Add(userContent);
-        chatHistory = contentsList.ToArray();
+        chatHistory.Add(userContent);
 
         ChatRequest chatRequest = new ChatRequest { contents = chatHistory };
 
-        string jsonData = JsonUtility.ToJson(chatRequest);
+        string jsonData = JsonConvert.SerializeObject(chatRequest);
+        byte[] jsonToSend = System.Text.Encoding.UTF8.GetBytes(jsonData);
 
-        byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(jsonData);
-
-        // Create a UnityWebRequest with the JSON data
         using (UnityWebRequest www = new UnityWebRequest(url, "POST"))
         {
             www.uploadHandler = new UploadHandlerRaw(jsonToSend);
@@ -198,53 +175,41 @@ public class UnityAndGeminiV3 : MonoBehaviour
             if (www.result != UnityWebRequest.Result.Success)
             {
                 Debug.LogError("Gemini API Error: " + www.error);
-                if (chatManager != null)
-                {
-                    chatManager.AddSystemMessage($"Error: {www.error}. Please try again.");
-                }
+                chatManager?.AddSystemMessage($"Error: {www.error}. Please try again.");
             }
             else
             {
-                Debug.Log("Request complete!");
-                Response response = JsonUtility.FromJson<Response>(www.downloadHandler.text);
-                if (response.candidates.Length > 0 && response.candidates[0].content.parts.Length > 0)
+                try
                 {
-                    //This is the response to your request
-                    string reply = response.candidates[0].content.parts[0].text;
-                    Content botContent = new Content
+                    var response = JsonConvert.DeserializeObject<GeminiResponse>(www.downloadHandler.text);
+
+                    if (response?.candidates != null &&
+                        response.candidates.Count > 0 &&
+                        response.candidates[0].content.parts.Count > 0)
                     {
-                        role = "model",
-                        parts = new Part[]
+                        string reply = response.candidates[0].content.parts[0].text;
+
+                        Content botContent = new Content
                         {
-                            new Part { text = reply }
-                        }
-                    };
+                            role = "model",
+                            parts = new List<Part> { new Part { text = reply } }
+                        };
+                        chatHistory.Add(botContent);
 
-                    Debug.Log("AI Response: " + reply);
-
-                    // Add AI response to chat
-                    if (chatManager != null)
-                    {
-                        chatManager.AddAIMessage(reply);
+                        Debug.Log("AI Response: " + reply);
+                        chatManager?.AddAIMessage(reply);
+                        googleServices?.SendTextToGoogle(reply);
                     }
-
-                    // Send to text-to-speech if available
-                    if (googleServices != null)
+                    else
                     {
-                        googleServices.SendTextToGoogle(reply);
+                        Debug.Log("No text found.");
+                        chatManager?.AddSystemMessage("AI response was empty. Please try again.");
                     }
-
-                    //This part adds the response to the chat history, for your next message
-                    contentsList.Add(botContent);
-                    chatHistory = contentsList.ToArray();
                 }
-                else
+                catch (System.Exception ex)
                 {
-                    Debug.Log("No text found.");
-                    if (chatManager != null)
-                    {
-                        chatManager.AddSystemMessage("AI response was empty. Please try again.");
-                    }
+                    Debug.LogError("JSON Parse Error: " + ex.Message);
+                    chatManager?.AddSystemMessage("Error parsing AI response.");
                 }
             }
         }
