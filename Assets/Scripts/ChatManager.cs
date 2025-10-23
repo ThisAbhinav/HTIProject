@@ -38,6 +38,7 @@ public class ChatManager : MonoBehaviour
     [SerializeField] private int maxMessages = 100;
     [SerializeField] private bool showTimestamps = false;
     [SerializeField] private bool autoScroll = true;
+    [SerializeField] private bool cleanDisplayText = true; // Option to clean text for display
 
     [Header("Message Colors")]
     [SerializeField] private Color userColor = Color.blue;
@@ -52,13 +53,13 @@ public class ChatManager : MonoBehaviour
 
     private void Start()
     {
-        // Add a welcome message
-        AddSystemMessage("Chat system initialized. Hold SPACE to speak!");
+        // Initialize with welcome message
+        AddSystemMessage("Welcome! Start speaking to learn French phrases.");
     }
 
     private void OnDestroy()
     {
-        // No UI cleanup needed for speech-only system
+        // Cleanup if needed
     }
 
     // Method to add user message
@@ -79,7 +80,7 @@ public class ChatManager : MonoBehaviour
     {
         if (string.IsNullOrEmpty(message.Trim())) return;
 
-        ChatMessage chatMessage = new ChatMessage("AI", message, MessageType.AI);
+        ChatMessage chatMessage = new ChatMessage("Jean", message, MessageType.AI);
         AddMessageToHistory(chatMessage);
         UpdateChatDisplay();
     }
@@ -124,8 +125,13 @@ public class ChatManager : MonoBehaviour
         {
             string colorHex = GetColorForMessageType(message.type);
             string timestamp = showTimestamps ? $"[{message.timestamp:HH:mm:ss}] " : "";
+            
+            // Clean the message for display if enabled
+            string messageContent = cleanDisplayText ? 
+                TextCleanerUtility.CleanForDisplay(message.message) : 
+                message.message;
 
-            displayText += $"{timestamp}<color={colorHex}><b>{message.sender}:</b></color> {message.message}\n\n";
+            displayText += $"{timestamp}<color={colorHex}><b>{message.sender}:</b></color> {messageContent}\n\n";
         }
 
         chatDisplay.text = displayText;
@@ -147,7 +153,6 @@ public class ChatManager : MonoBehaviour
             MessageType.System => systemColor,
             _ => Color.white
         };
-
         return "#" + ColorUtility.ToHtmlStringRGB(color);
     }
 
@@ -174,17 +179,22 @@ public class ChatManager : MonoBehaviour
     public List<ChatMessage> GetRecentMessages(int count = 10)
     {
         int startIndex = Mathf.Max(0, chatHistory.Count - count);
-        int actualCount = chatHistory.Count - startIndex;
-
         List<ChatMessage> recent = new List<ChatMessage>();
+        
         for (int i = startIndex; i < chatHistory.Count; i++)
         {
             recent.Add(chatHistory[i]);
         }
-
         return recent;
     }
 
     // Public property to access chat history
     public List<ChatMessage> ChatHistory => new List<ChatMessage>(chatHistory);
+
+    // Method to toggle text cleaning
+    public void ToggleTextCleaning(bool enabled)
+    {
+        cleanDisplayText = enabled;
+        UpdateChatDisplay();
+    }
 }
