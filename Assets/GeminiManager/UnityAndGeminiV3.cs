@@ -187,7 +187,6 @@ Key phrases:
     private IEnumerator SendChatRequestToGemini(string newMessage)
     {
         isProcessing = true;
-        chatManager?.AddSystemMessage("AI is thinking...");
 
         string url = $"{apiEndpoint}?key={apiKey}";
 

@@ -1,6 +1,7 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 using System.Collections.Generic;
 using System;
 
@@ -54,7 +55,7 @@ public class ChatManager : MonoBehaviour
     private void Start()
     {
         // Initialize with welcome message
-        AddSystemMessage("Welcome! Start speaking to learn French phrases.");
+        AddSystemMessage("Jean, Barista at Starbucks");
     }
 
     private void OnDestroy()
@@ -125,10 +126,10 @@ public class ChatManager : MonoBehaviour
         {
             string colorHex = GetColorForMessageType(message.type);
             string timestamp = showTimestamps ? $"[{message.timestamp:HH:mm:ss}] " : "";
-            
+
             // Clean the message for display if enabled
-            string messageContent = cleanDisplayText ? 
-                TextCleanerUtility.CleanForDisplay(message.message) : 
+            string messageContent = cleanDisplayText ?
+                TextCleanerUtility.CleanForDisplay(message.message) :
                 message.message;
 
             displayText += $"{timestamp}<color={colorHex}><b>{message.sender}:</b></color> {messageContent}\n\n";
@@ -136,12 +137,28 @@ public class ChatManager : MonoBehaviour
 
         chatDisplay.text = displayText;
 
-        // Auto scroll to bottom
+        // Auto scroll to bottom - Use coroutine for reliable scrolling
         if (autoScroll && scrollRect != null)
         {
-            Canvas.ForceUpdateCanvases();
-            scrollRect.verticalNormalizedPosition = 0f;
+            StartCoroutine(ScrollToBottom());
         }
+    }
+
+    // Coroutine to ensure scroll happens after layout is updated
+    private IEnumerator ScrollToBottom()
+    {
+        // Wait for end of frame to ensure layout is complete
+        yield return new WaitForEndOfFrame();
+
+        // Force canvas update
+        Canvas.ForceUpdateCanvases();
+
+        // Scroll to bottom (1f = bottom, 0f = top in Unity ScrollRect)
+        scrollRect.verticalNormalizedPosition = 0f;
+
+        // Additional frame wait for safety
+        yield return null;
+        scrollRect.verticalNormalizedPosition = 0f;
     }
 
     private string GetColorForMessageType(MessageType type)
@@ -180,7 +197,7 @@ public class ChatManager : MonoBehaviour
     {
         int startIndex = Mathf.Max(0, chatHistory.Count - count);
         List<ChatMessage> recent = new List<ChatMessage>();
-        
+
         for (int i = startIndex; i < chatHistory.Count; i++)
         {
             recent.Add(chatHistory[i]);
