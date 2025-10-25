@@ -171,7 +171,7 @@ Key phrases:
     {
         if (isProcessing)
         {
-            chatManager?.AddSystemMessage("Please wait for the current response to complete.");
+            Debug.Log("Please wait for the current response to complete.");
             return;
         }
 
