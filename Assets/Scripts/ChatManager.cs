@@ -1,7 +1,5 @@
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
-using System.Collections;
 using System.Collections.Generic;
 using System;
 
@@ -33,13 +31,11 @@ public class ChatManager : MonoBehaviour
 {
     [Header("UI References")]
     [SerializeField] private TMP_Text chatDisplay;
-    [SerializeField] private ScrollRect scrollRect;
 
     [Header("Chat Settings")]
-    [SerializeField] private int maxMessages = 100;
+    [SerializeField] private int maxVisibleMessages = 15;
     [SerializeField] private bool showTimestamps = false;
-    [SerializeField] private bool autoScroll = true;
-    [SerializeField] private bool cleanDisplayText = true; // Option to clean text for display
+    [SerializeField] private bool cleanDisplayText = true;
 
     [Header("Message Colors")]
     [SerializeField] private Color userColor = Color.blue;
@@ -48,45 +44,42 @@ public class ChatManager : MonoBehaviour
 
     private List<ChatMessage> chatHistory = new List<ChatMessage>();
 
-    // Events for other scripts to subscribe to
     public static event Action<string> OnUserMessage;
     public static event Action<ChatMessage> OnMessageAdded;
 
     private void Start()
     {
-        // Initialize with welcome message
+        SetupChatDisplay();
         AddSystemMessage("Jean, Barista at Starbucks");
     }
 
-    private void OnDestroy()
+    private void SetupChatDisplay()
     {
-        // Cleanup if needed
+        if (chatDisplay == null) return;
+
+        chatDisplay.textWrappingMode = TextWrappingModes.Normal;
     }
 
-    // Method to add user message
     public void AddUserMessage(string message)
     {
-        if (string.IsNullOrEmpty(message.Trim())) return;
+        if (string.IsNullOrWhiteSpace(message)) return;
 
         ChatMessage chatMessage = new ChatMessage("You", message, MessageType.User);
         AddMessageToHistory(chatMessage);
         UpdateChatDisplay();
 
-        // Notify other scripts that user sent a message
         OnUserMessage?.Invoke(message);
     }
 
-    // Method to add AI response
     public void AddAIMessage(string message)
     {
-        if (string.IsNullOrEmpty(message.Trim())) return;
+        if (string.IsNullOrWhiteSpace(message)) return;
 
         ChatMessage chatMessage = new ChatMessage("Jean", message, MessageType.AI);
         AddMessageToHistory(chatMessage);
         UpdateChatDisplay();
     }
 
-    // Method to add system messages
     public void AddSystemMessage(string message)
     {
         ChatMessage chatMessage = new ChatMessage("System", message, MessageType.System);
@@ -94,7 +87,6 @@ public class ChatManager : MonoBehaviour
         UpdateChatDisplay();
     }
 
-    // Generic method to add any message
     public void AddMessage(string sender, string message, MessageType type)
     {
         ChatMessage chatMessage = new ChatMessage(sender, message, type);
@@ -105,14 +97,6 @@ public class ChatManager : MonoBehaviour
     private void AddMessageToHistory(ChatMessage message)
     {
         chatHistory.Add(message);
-
-        // Remove old messages if we exceed the limit
-        if (chatHistory.Count > maxMessages)
-        {
-            chatHistory.RemoveAt(0);
-        }
-
-        // Notify subscribers
         OnMessageAdded?.Invoke(message);
     }
 
@@ -120,14 +104,17 @@ public class ChatManager : MonoBehaviour
     {
         if (chatDisplay == null) return;
 
+        // Get the range of messages to display (most recent N messages)
+        int startIndex = Mathf.Max(0, chatHistory.Count - maxVisibleMessages);
+        List<ChatMessage> visibleMessages = chatHistory.GetRange(startIndex, chatHistory.Count - startIndex);
+
         string displayText = "";
 
-        foreach (ChatMessage message in chatHistory)
+        foreach (ChatMessage message in visibleMessages)
         {
             string colorHex = GetColorForMessageType(message.type);
             string timestamp = showTimestamps ? $"[{message.timestamp:HH:mm:ss}] " : "";
 
-            // Clean the message for display if enabled
             string messageContent = cleanDisplayText ?
                 TextCleanerUtility.CleanForDisplay(message.message) :
                 message.message;
@@ -135,30 +122,7 @@ public class ChatManager : MonoBehaviour
             displayText += $"{timestamp}<color={colorHex}><b>{message.sender}:</b></color> {messageContent}\n\n";
         }
 
-        chatDisplay.text = displayText;
-
-        // Auto scroll to bottom - Use coroutine for reliable scrolling
-        if (autoScroll && scrollRect != null)
-        {
-            StartCoroutine(ScrollToBottom());
-        }
-    }
-
-    // Coroutine to ensure scroll happens after layout is updated
-    private IEnumerator ScrollToBottom()
-    {
-        // Wait for end of frame to ensure layout is complete
-        yield return new WaitForEndOfFrame();
-
-        // Force canvas update
-        Canvas.ForceUpdateCanvases();
-
-        // Scroll to bottom (1f = bottom, 0f = top in Unity ScrollRect)
-        scrollRect.verticalNormalizedPosition = 0f;
-
-        // Additional frame wait for safety
-        yield return null;
-        scrollRect.verticalNormalizedPosition = 0f;
+        chatDisplay.text = displayText.TrimEnd();
     }
 
     private string GetColorForMessageType(MessageType type)
@@ -173,7 +137,6 @@ public class ChatManager : MonoBehaviour
         return "#" + ColorUtility.ToHtmlStringRGB(color);
     }
 
-    // Method to clear chat history
     public void ClearChat()
     {
         chatHistory.Clear();
@@ -181,7 +144,6 @@ public class ChatManager : MonoBehaviour
         AddSystemMessage("Chat cleared. Hold SPACE to speak!");
     }
 
-    // Method to get chat history as string (useful for saving)
     public string GetChatHistoryAsString()
     {
         string history = "";
@@ -192,26 +154,23 @@ public class ChatManager : MonoBehaviour
         return history;
     }
 
-    // Method to get recent messages for context
     public List<ChatMessage> GetRecentMessages(int count = 10)
     {
         int startIndex = Mathf.Max(0, chatHistory.Count - count);
-        List<ChatMessage> recent = new List<ChatMessage>();
-
-        for (int i = startIndex; i < chatHistory.Count; i++)
-        {
-            recent.Add(chatHistory[i]);
-        }
-        return recent;
+        return chatHistory.GetRange(startIndex, chatHistory.Count - startIndex);
     }
 
-    // Public property to access chat history
     public List<ChatMessage> ChatHistory => new List<ChatMessage>(chatHistory);
 
-    // Method to toggle text cleaning
     public void ToggleTextCleaning(bool enabled)
     {
         cleanDisplayText = enabled;
+        UpdateChatDisplay();
+    }
+
+    public void SetMaxVisibleMessages(int count)
+    {
+        maxVisibleMessages = Mathf.Max(1, count);
         UpdateChatDisplay();
     }
 }
