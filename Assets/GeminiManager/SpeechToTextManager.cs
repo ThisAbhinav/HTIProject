@@ -18,7 +18,7 @@ namespace GoogleSpeechToText.Scripts
         [Header("Input Settings")]
         [SerializeField] private bool useVRControllers = true;
         [SerializeField] private XRNode controllerHand = XRNode.RightHand;
-        [SerializeField] private string vrButtonFeature = "PrimaryButton"; // Button feature name
+        [SerializeField] private string vrButtonFeature = "triggerButton";
 
         private AudioClip clip;
         private byte[] bytes;
@@ -108,7 +108,6 @@ namespace GoogleSpeechToText.Scripts
             {
                 targetDevice = devices[0];
 
-                // Initialize button usage based on the feature name
                 buttonUsage = new InputFeatureUsage<bool>(vrButtonFeature);
 
                 Debug.Log($"VR Controller initialized: {targetDevice.name} on {controllerHand} with button: {vrButtonFeature}");

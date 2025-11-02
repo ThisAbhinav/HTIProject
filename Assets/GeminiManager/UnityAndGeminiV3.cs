@@ -46,12 +46,6 @@ public class ChatRequest
     public List<Content> contents;
 }
 
-public enum LearningTopic
-{
-    CoffeeShop,
-    Cooking
-}
-
 public class UnityAndGeminiV3 : MonoBehaviour
 {
     [Header("Gemini API Password")]
@@ -62,53 +56,15 @@ public class UnityAndGeminiV3 : MonoBehaviour
     [SerializeField] private TextToSpeechManager googleServices;
     [SerializeField] private ChatManager chatManager;
 
-    [Header("Learning Settings")]
-    [SerializeField] private LearningTopic currentTopic = LearningTopic.CoffeeShop;
 
     private List<Content> chatHistory = new List<Content>();
     private bool isProcessing = false;
     private bool systemPromptInitialized = false;
 
-    // System prompts for different topics (explicitly enforce short replies)
-    private Dictionary<LearningTopic, string> systemPrompts = new Dictionary<LearningTopic, string>()
-    {
-        {
-            LearningTopic.CoffeeShop,
-            @"You are Jean, a friendly French tutor helping students order in a coffee shop.
-
-Your teaching approach:
-- Introduce coffee-ordering terms naturally: 'le café', 'le thé', 'le menu', 'commander', 'à emporter', 'sur place', 'décaféiné', 'avec du lait', 'sans sucre', 'l’addition'.
-- Provide French + English on first mention of a term.
-- Use simple beginner sentences and encourage quick practice.
-
-RESPONSE STYLE (IMPORTANT):
-- Always reply in 1–2 SHORT sentences, max ~30 words total.
-- Keep it conversational, no markdown, no lists, no asterisks.
-- Prefer giving 1 example phrase the learner can repeat.
-
-Key phrases:
-- 'Je voudrais un café, s’il vous plaît.' (I’d like a coffee, please.)
-- 'À emporter ou sur place ?' (To go or for here?)
-- 'L’addition, s’il vous plaît.' (The bill, please.)"
-        },
-        {
-            LearningTopic.Cooking,
-            @"You are Jean, a friendly French tutor helping students learn cooking vocabulary.
-
-Your teaching approach:
-- Introduce cooking terms naturally: 'la cuisine', 'cuisiner', 'la recette', 'les ingrédients', 'le four', 'la casserole', 'couper', 'mélanger', 'cuire'.
-- Provide French + English on first mention of a term.
-
-RESPONSE STYLE (IMPORTANT):
-- Always reply in 1–2 SHORT sentences, max ~30 words total.
-- Conversational, no markdown, no lists, no asterisks.
-- Prefer giving 1 example phrase to repeat.
-
-Key phrases:
-- 'Je fais la cuisine.' (I’m cooking.)
-- 'Ajoute du sel.' (Add salt.)"
-        }
-    };
+    [SerializeField]
+    private string systemPrompt = @"You are Jean, a friend who studies in America. 
+You study in University of Minnesota in 3rd year pursing a degree of Mechanical Engineering.
+";
 
     void Start()
     {
@@ -128,9 +84,6 @@ Key phrases:
     {
         if (systemPromptInitialized) return;
 
-        string systemPrompt = systemPrompts[currentTopic];
-
-        // Send the system prompt as the first "user" message to prime Gemini
         Content systemContent = new Content
         {
             role = "user",
@@ -138,29 +91,9 @@ Key phrases:
         };
         chatHistory.Add(systemContent);
 
-        // Optional ack from model to stabilize context
-        Content modelAck = new Content
-        {
-            role = "model",
-            parts = new List<Part> { new Part { text = "Understood. I will teach with short, simple replies for quick practice." } }
-        };
-        chatHistory.Add(modelAck);
-
         systemPromptInitialized = true;
-        Debug.Log($"System prompt initialized for topic: {currentTopic}");
     }
 
-    // Public method to change learning topic
-    public void ChangeTopic(LearningTopic newTopic)
-    {
-        currentTopic = newTopic;
-        chatHistory.Clear();
-        systemPromptInitialized = false;
-        InitializeSystemPrompt();
-
-        string topicName = newTopic == LearningTopic.CoffeeShop ? "coffee shop ordering" : "cooking";
-        chatManager?.AddSystemMessage($"Topic changed to {topicName}. On y va !");
-    }
 
     private void HandleUserMessage(string message)
     {
@@ -188,8 +121,11 @@ Key phrases:
     {
         isProcessing = true;
 
+        if (googleServices != null)
+        {
+            googleServices.PlayFiller();
+        }
         string url = $"{apiEndpoint}?key={apiKey}";
-
         // Build user message
         Content userContent = new Content
         {
