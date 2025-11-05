@@ -50,7 +50,7 @@ public class ChatManager : MonoBehaviour
     private void Start()
     {
         SetupChatDisplay();
-        AddSystemMessage("Jean, Barista at Starbucks");
+        AddSystemMessage("Alex - UC Berkeley Student | HTI Experiment Active");
     }
 
     private void SetupChatDisplay()
@@ -74,9 +74,7 @@ public class ChatManager : MonoBehaviour
     public void AddAIMessage(string message)
     {
         if (string.IsNullOrWhiteSpace(message)) return;
-
-        ChatMessage chatMessage = new ChatMessage("Jean", message, MessageType.AI);
-        
+        ChatMessage chatMessage = new ChatMessage("Alex", message, MessageType.AI);
         AddMessageToHistory(chatMessage);
         UpdateChatDisplay();
     }

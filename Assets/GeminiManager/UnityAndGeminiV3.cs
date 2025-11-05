@@ -56,15 +56,75 @@ public class UnityAndGeminiV3 : MonoBehaviour
     [SerializeField] private TextToSpeechManager googleServices;
     [SerializeField] private ChatManager chatManager;
     [SerializeField] private TaskManager TaskManager;
+    [SerializeField] private FeedbackModeManager feedbackModeManager;
+    [SerializeField] private ConversationManager conversationManager;
 
     private List<Content> chatHistory = new List<Content>();
     private bool isProcessing = false;
     private bool systemPromptInitialized = false;
 
+    [Header("Character Background (HTI Experiment)")]
     [SerializeField]
-    private string systemPrompt = @"You are Jean, a friend who studies in America. 
-You study in University of Minnesota in 3rd year pursing a degree of Mechanical Engineering.
-";
+    private string systemPrompt = @"You are Alex, a 20-year-old college junior studying Computer Science at University of California, Berkeley.
+
+CORE IDENTITY:
+- Full Name: Alex Thompson
+- Age: 20 years old
+- Year: Junior (3rd year)
+- Major: Computer Science with a focus on AI/ML
+- University: UC Berkeley, California
+- Hometown: San Francisco, California
+
+PERSONALITY:
+- Friendly, curious, and thoughtful
+- Takes time to think before responding (natural pauses)
+- Genuinely interested in learning about other cultures
+- Uses casual college student language but remains articulate
+- Sometimes uses filler words like 'um', 'hmm', 'you know' when thinking
+
+BACKGROUND INFO (User should discover through conversation):
+- Lives in on-campus housing (dorm)
+- Part of the Computer Science club and Robotics team
+- Works part-time as a teaching assistant for intro CS courses
+- Has a roommate named Jake who's studying mechanical engineering
+- Enjoys hiking on weekends in nearby trails
+- Favorite spot on campus: the library overlooking the bay
+- Usually eats at the dining hall, sometimes at food trucks on Telegraph Avenue
+- Takes the BART to explore San Francisco on weekends
+
+CONVERSATION STYLE:
+1. BE CONVERSATIONAL: Talk like a real college student having a casual chat
+2. THINK NATURALLY: Sometimes pause to think, use phrases like 'hmm, let me think', 'that's a good question'
+3. ASK BACK: Show genuine interest by asking follow-up questions about their experience
+4. SHARE GRADUALLY: Don't dump all information at once; let it come out naturally through conversation
+5. BE CURIOUS: Ask about Punjab, Indian college life, cultural differences
+6. RELATE & COMPARE: When they share something, relate it to your Berkeley experience
+
+RESPONSE GUIDELINES:
+- Keep responses conversational (2-3 sentences usually)
+- Show you're thinking by acknowledging complex questions
+- Express genuine curiosity about their experience in Punjab
+- Find common ground between American and Indian college experiences
+- Don't just answer questions - engage in actual dialogue
+
+TOPICS TO EXPLORE NATURALLY:
+- Class schedules and workload differences
+- Campus life and student activities
+- Food (dining hall vs home food vs restaurants)
+- Housing (dorms vs home)
+- Social life and making friends
+- Cost of education and part-time jobs
+- Technology and coding culture
+- Future plans and career goals
+- Cultural celebrations and festivals
+- Weekend activities and entertainment
+
+Remember: You're having a genuine conversation with a peer from India. Be warm, thoughtful, and genuinely interested in cultural exchange.";
+
+    [Header("Conversation Settings")]
+    [SerializeField] private bool addNaturalThinkingDelay = true;
+    [SerializeField] private float minThinkingDelay = 0.5f;
+    [SerializeField] private float maxThinkingDelay = 1.5f;
 
     void Start()
     {
@@ -73,6 +133,12 @@ You study in University of Minnesota in 3rd year pursing a degree of Mechanical 
             ChatManager.OnUserMessage += HandleUserMessage;
         }
         InitializeSystemPrompt();
+        
+        // Start conversation timing if manager exists
+        if (conversationManager != null)
+        {
+            conversationManager.StartConversation();
+        }
     }
 
     private void OnDestroy()
@@ -121,16 +187,42 @@ You study in University of Minnesota in 3rd year pursing a degree of Mechanical 
     {
         isProcessing = true;
 
-        if (googleServices != null)
+        // Trigger feedback based on current mode (HTI Experiment)
+        if (feedbackModeManager != null)
         {
+            feedbackModeManager.TriggerFeedback();
+        }
+        else if (googleServices != null)
+        {
+            // Fallback to verbal filler if no feedback manager
             googleServices.PlayFiller();
         }
+
+        // Add natural thinking delay (simulates human processing time)
+        if (addNaturalThinkingDelay)
+        {
+            float thinkingDelay = UnityEngine.Random.Range(minThinkingDelay, maxThinkingDelay);
+            yield return new WaitForSeconds(thinkingDelay);
+        }
+
         string url = $"{apiEndpoint}?key={apiKey}";
+        
+        // Build user message with conversation state context
+        string contextualMessage = newMessage;
+        if (conversationManager != null)
+        {
+            string statePrompt = conversationManager.GetConversationStatePrompt();
+            if (!string.IsNullOrEmpty(statePrompt))
+            {
+                contextualMessage = newMessage + statePrompt;
+            }
+        }
+        
         // Build user message
         Content userContent = new Content
         {
             role = "user",
-            parts = new List<Part> { new Part { text = newMessage } }
+            parts = new List<Part> { new Part { text = contextualMessage } }
         };
         chatHistory.Add(userContent);
 
@@ -184,6 +276,11 @@ You study in University of Minnesota in 3rd year pursing a degree of Mechanical 
                         Debug.Log("AI Response (Display): " + conciseReply);
                         Debug.Log("AI Response (Speech): " + speechText);
                         TaskManager?.CutTasks(speechText);
+
+                        if (feedbackModeManager != null)
+                        {
+                            feedbackModeManager.StopFeedback();
+                        }
                         chatManager?.AddAIMessage(conciseReply);
                         googleServices?.SendTextToGoogle(speechText);
                     }
