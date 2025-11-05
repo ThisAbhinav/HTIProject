@@ -2,22 +2,39 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using TMPro;
+using System;
+
+/// <summary>
+/// Manages background information discovery tasks for HTI experiment
+/// Tracks what info has been naturally revealed during conversation
+/// Emits events that ConversationManager subscribes to
+/// </summary>
 public class TaskManager : MonoBehaviour
 {
     [SerializeField] private GameObject TasksBox;
-
-    // Use Task objects instead of strings for better control
     [SerializeField] private List<UserTask> tasks = new List<UserTask>();
 
-    // Keep track of text objects for UI updates
-    private Dictionary<UserTask, TextMeshProUGUI> taskTextMap = new ();
+    private Dictionary<UserTask, TextMeshProUGUI> taskTextMap = new Dictionary<UserTask, TextMeshProUGUI>();
+
+    // Events for ConversationManager to subscribe to
+    public static event Action<string> OnTaskCompleted;
+    public static event Action<int, int> OnTaskProgressChanged; // (completed, total)
+
+    public int CompletedTasksCount { get; private set; }
+    public int TotalTasksCount => tasks.Count;
 
     void Start()
     {
+        InitializeTaskUI();
+        CompletedTasksCount = 0;
+    }
+
+    private void InitializeTaskUI()
+    {
+        if (TasksBox == null) return;
+
         RectTransform boxRect = TasksBox.GetComponent<RectTransform>();
         boxRect.sizeDelta = new Vector2(250, 300);
-        boxRect.transform.localPosition = boxRect.transform.localPosition + new Vector3(0, 0, 0);
-
 
         ContentSizeFitter fitter = TasksBox.AddComponent<ContentSizeFitter>();
         fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
@@ -29,14 +46,12 @@ public class TaskManager : MonoBehaviour
             GameObject taskTextObj = new GameObject(task.title);
             taskTextObj.transform.SetParent(TasksBox.transform, false);
 
-            // Add TextMeshProUGUI
             TextMeshProUGUI textComponent = taskTextObj.AddComponent<TextMeshProUGUI>();
-            textComponent.text = "� " + task.title;
+            textComponent.text = "☐ " + task.title;
             textComponent.fontSize = 15;
             textComponent.color = Color.black;
             textComponent.alignment = TextAlignmentOptions.Left;
 
-            // Adjust layout width
             RectTransform rect = taskTextObj.GetComponent<RectTransform>();
             rect.sizeDelta = new Vector2(230, 20);
 
@@ -44,8 +59,14 @@ public class TaskManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Check avatar response for task completion keywords
+    /// Called by UnityAndGeminiV3 after each AI response
+    /// </summary>
     public void CutTasks(string avatarResponse)
     {
+        if (string.IsNullOrEmpty(avatarResponse)) return;
+
         avatarResponse = avatarResponse.ToLower();
 
         foreach (UserTask task in tasks)
@@ -57,7 +78,14 @@ public class TaskManager : MonoBehaviour
                     if (avatarResponse.Contains(keyword.ToLower()))
                     {
                         task.isCompleted = true;
+                        CompletedTasksCount++;
                         UpdateTaskVisual(task);
+                        
+                        Debug.Log($"[TaskManager] ✓ Discovered: {task.title} ({CompletedTasksCount}/{TotalTasksCount})");
+                        
+                        // Notify ConversationManager
+                        OnTaskCompleted?.Invoke(task.title);
+                        OnTaskProgressChanged?.Invoke(CompletedTasksCount, TotalTasksCount);
                         break;
                     }
                 }
@@ -69,10 +97,38 @@ public class TaskManager : MonoBehaviour
     {
         if (taskTextMap.TryGetValue(task, out TextMeshProUGUI text))
         {
-            // Apply strikethrough for completed tasks
+            text.text = "☑ " + task.title;
             text.fontStyle = FontStyles.Strikethrough;
-            text.color = Color.gray;
+            text.color = new Color(0.5f, 0.5f, 0.5f, 0.7f); // Gray with slight transparency
         }
+    }
+
+    /// <summary>
+    /// Get completion status for ConversationManager
+    /// </summary>
+    public bool HasMetMinimumInfo(int minRequired)
+    {
+        return CompletedTasksCount >= minRequired;
+    }
+
+    /// <summary>
+    /// Reset all tasks (for testing)
+    /// </summary>
+    [ContextMenu("Reset All Tasks")]
+    public void ResetAllTasks()
+    {
+        CompletedTasksCount = 0;
+        foreach (UserTask task in tasks)
+        {
+            task.isCompleted = false;
+            if (taskTextMap.TryGetValue(task, out TextMeshProUGUI text))
+            {
+                text.text = "☐ " + task.title;
+                text.fontStyle = FontStyles.Normal;
+                text.color = Color.black;
+            }
+        }
+        OnTaskProgressChanged?.Invoke(0, TotalTasksCount);
     }
 }
 

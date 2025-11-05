@@ -1,55 +1,84 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using TMPro;
+using GoogleTextToSpeech.Scripts;
 
 /// <summary>
-/// Manages conversation timing and natural ending detection
-/// Ensures conversations have appropriate length while ending naturally
+/// Central controller for HTI experiment conversation management
+/// Manages conversation flow, feedback modalities, timing, and data logging
 /// </summary>
 public class ConversationManager : MonoBehaviour
 {
-    [Header("Timing Settings")]
+    [System.Flags]
+    public enum FeedbackType
+    {
+        None = 0,
+        VerbalFiller = 1 << 0,      // "um", "hmm" audio fillers
+        VisualCue = 1 << 1          // Spinning/pulsing loading icon
+    }
+
+    [Header("=== EXPERIMENT CONFIGURATION ===")]
+    [SerializeField] private bool enableFeedback = true; // Main control/experiment toggle
+    [SerializeField] private FeedbackType activeFeedbackTypes = FeedbackType.VerbalFiller | FeedbackType.VisualCue;
+    
+    [Header("=== Component References ===")]
+    [SerializeField] private TextToSpeechManager ttsManager;
+    [SerializeField] private TaskManager taskManager;
+    [SerializeField] private GameObject visualCueIndicator; // Simple spinning icon
+    [SerializeField] private TMP_Text visualCueText; // "Thinking..." text
+    
+    [Header("=== Timing Settings ===")]
     [SerializeField] private float targetDurationMinutes = 10f;
     [SerializeField] private float minDurationMinutes = 5f;
     [SerializeField] private float maxDurationMinutes = 15f;
     [SerializeField] private bool enableTimeLimits = true;
     
-    [Header("Conversation Goals (Exchange count not used - time-based only)")]
-    [SerializeField][HideInInspector] private int minExchanges = 10; // Not used
-    [SerializeField][HideInInspector] private int targetExchanges = 20; // Not used
-    
-    [Header("Background Info Discovery")]
-    [SerializeField] private List<string> backgroundInfoToDiscover = new List<string>
+    [Header("=== Visual Cue Settings ===")]
+    [SerializeField] private float iconRotationSpeed = 180f;
+    [SerializeField] private string[] thinkingMessages = new string[]
     {
-        "Lives in dorms",
-        "Has roommate named Jake",
-        "Works as teaching assistant",
-        "Member of CS club and Robotics team",
-        "Enjoys hiking",
-        "Favorite campus spot",
-        "Dining hall food habits",
-        "Takes BART on weekends"
+        "Thinking...",
+        "Processing...",
+        "Hmm...",
+        "Let me think..."
     };
     
-    [SerializeField] private int minInfoDiscovered = 3; // Min topics covered
-    [SerializeField] private int targetInfoDiscovered = 5; // Target topics
+    [Header("=== Info Discovery Settings ===")]
+    [SerializeField] private int minInfoDiscovered = 3;
+    [SerializeField] private int targetInfoDiscovered = 5;
     
-    [Header("Closing Signals")]
+    [Header("=== Closing Settings ===")]
     [SerializeField] private bool enableNaturalClosing = true;
-    [SerializeField] private float closingWindowStartPercent = 0.7f; // Start looking for closing after 70% time
+    [SerializeField] private float closingWindowStartPercent = 0.7f;
     
+    [Header("=== Data Logging ===")]
+    [SerializeField] private string logDirectory = "Assets/ExperimentLogs";
+    [SerializeField] private bool autoSaveOnEnd = true;
+
+    // State tracking
     private float conversationStartTime;
     private int exchangeCount = 0;
-    private HashSet<string> discoveredInfo = new HashSet<string>();
+    private int infoDiscoveredCount = 0;
     private bool conversationActive = false;
     private bool inClosingWindow = false;
     private bool shouldStartClosing = false;
-
+    private bool feedbackActive = false;
+    private float lastLogTime = 0f;
+    private float logInterval = 60f;
+    
+    // Logging data
+    private List<ConversationLogEntry> conversationLog = new List<ConversationLogEntry>();
+    private Dictionary<string, float> feedbackTimings = new Dictionary<string, float>();
+    
+    // Singleton
     public static ConversationManager Instance { get; private set; }
+    
+    // Events
     public static event Action OnConversationStart;
     public static event Action OnConversationEnd;
-    public static event Action<float> OnTimeUpdate; // Sends remaining time percentage
-    public static event Action<string> OnInfoDiscovered;
 
     private void Awake()
     {
@@ -66,15 +95,21 @@ public class ConversationManager : MonoBehaviour
     private void Start()
     {
         ChatManager.OnMessageAdded += OnMessageReceived;
+        
+        // Subscribe to TaskManager events
+        TaskManager.OnTaskCompleted += OnInfoDiscovered;
+        TaskManager.OnTaskProgressChanged += OnInfoProgressChanged;
+        
+        if (visualCueIndicator != null)
+            visualCueIndicator.SetActive(false);
     }
 
     private void OnDestroy()
     {
         ChatManager.OnMessageAdded -= OnMessageReceived;
+        TaskManager.OnTaskCompleted -= OnInfoDiscovered;
+        TaskManager.OnTaskProgressChanged -= OnInfoProgressChanged;
     }
-
-    private float lastLogTime = 0f;
-    private float logInterval = 60f; // Log every minute
 
     private void Update()
     {
@@ -88,25 +123,30 @@ public class ConversationManager : MonoBehaviour
         {
             lastLogTime = elapsed;
             int mins = Mathf.FloorToInt(elapsedMinutes);
-            Debug.Log($"[Conversation Progress] {mins} min | Exchanges: {exchangeCount} | Info Discovered: {discoveredInfo.Count}/{backgroundInfoToDiscover.Count}");
+            Debug.Log($"[Conversation] {mins}m | Exchanges: {exchangeCount} | Info: {infoDiscoveredCount}/{taskManager.TotalTasksCount}");
         }
         
-        // Update time percentage
         float timePercent = Mathf.Clamp01(elapsedMinutes / targetDurationMinutes);
-        OnTimeUpdate?.Invoke(timePercent);
 
-        // Check if we've entered the closing window
+        // Check closing window
         if (enableNaturalClosing && !inClosingWindow && timePercent >= closingWindowStartPercent)
         {
             inClosingWindow = true;
-            Debug.Log($"[Conversation Manager] Entering closing window at {elapsedMinutes:F1} minutes");
+            Debug.Log($"[Conversation] Entering closing window at {elapsedMinutes:F1} minutes");
+            LogEvent("CLOSING_WINDOW_ENTERED", $"Time: {elapsedMinutes:F2}m");
             CheckShouldStartClosing();
         }
 
-        // Hard time limit (safety)
+        // Hard time limit
         if (enableTimeLimits && elapsedMinutes >= maxDurationMinutes)
         {
             EndConversation("Maximum time reached");
+        }
+        
+        // Rotate visual cue icon if active
+        if (feedbackActive && visualCueIndicator != null && visualCueIndicator.activeSelf)
+        {
+            visualCueIndicator.transform.Rotate(Vector3.forward, iconRotationSpeed * Time.deltaTime);
         }
     }
 
@@ -115,12 +155,23 @@ public class ConversationManager : MonoBehaviour
         conversationStartTime = Time.time;
         conversationActive = true;
         exchangeCount = 0;
-        discoveredInfo.Clear();
+        infoDiscoveredCount = 0;
         inClosingWindow = false;
         shouldStartClosing = false;
         lastLogTime = 0f;
+        conversationLog.Clear();
+        feedbackTimings.Clear();
 
-        Debug.Log($"[Conversation Manager] ▶ Started - Target: {targetDurationMinutes} min | Min: {minDurationMinutes} min | Max: {maxDurationMinutes} min");
+        // Reset TaskManager tasks
+        if (taskManager != null)
+        {
+            taskManager.ResetAllTasks();
+        }
+
+        string feedbackStatus = enableFeedback ? activeFeedbackTypes.ToString() : "None (Control)";
+        Debug.Log($"[Conversation] ▶ STARTED | Target: {targetDurationMinutes}m | Feedback: {feedbackStatus}");
+        
+        LogEvent("CONVERSATION_START", $"Feedback: {feedbackStatus}");
         OnConversationStart?.Invoke();
     }
 
@@ -131,8 +182,17 @@ public class ConversationManager : MonoBehaviour
         conversationActive = false;
         float duration = (Time.time - conversationStartTime) / 60f;
         
-        Debug.Log($"[Conversation Manager] ■ Ended - Reason: {reason}");
-        Debug.Log($"[Conversation Stats] Duration: {duration:F2} min | Exchanges: {exchangeCount} | Info: {discoveredInfo.Count}/{backgroundInfoToDiscover.Count}");
+        int totalInfo = taskManager != null ? taskManager.TotalTasksCount : 8;
+        Debug.Log($"[Conversation] ■ ENDED - {reason}");
+        Debug.Log($"[Stats] Duration: {duration:F2}m | Exchanges: {exchangeCount} | Info: {infoDiscoveredCount}/{totalInfo}");
+        
+        LogEvent("CONVERSATION_END", $"Reason: {reason} | Duration: {duration:F2}m");
+        
+        if (autoSaveOnEnd)
+        {
+            SaveConversationLog();
+        }
+        
         OnConversationEnd?.Invoke();
     }
 
@@ -140,103 +200,164 @@ public class ConversationManager : MonoBehaviour
     {
         if (!conversationActive) return;
 
-        // Count exchanges (user + AI response = 1 exchange)
-        if (message.type == MessageType.User || message.type == MessageType.AI)
+        if (message.type == MessageType.User)
         {
-            if (message.type == MessageType.AI)
-            {
-                exchangeCount++;
-            }
-
-            // Check for background info discovery in AI messages
-            if (message.type == MessageType.AI)
-            {
-                CheckForInfoDiscovery(message.message);
-            }
+            LogEvent("USER_MESSAGE", message.message);
+        }
+        else if (message.type == MessageType.AI)
+        {
+            exchangeCount++;
+            LogEvent("AI_RESPONSE", message.message);
         }
 
-        // Update closing status
         if (inClosingWindow)
         {
             CheckShouldStartClosing();
         }
     }
 
-    private void CheckForInfoDiscovery(string message)
+    /// <summary>
+    /// Trigger feedback when LLM processing starts
+    /// </summary>
+    public void TriggerFeedback(string llmResponsePreview = "")
     {
-        foreach (string info in backgroundInfoToDiscover)
+        if (!enableFeedback)
         {
-            if (!discoveredInfo.Contains(info))
-            {
-                // Simple keyword matching (you can make this more sophisticated)
-                if (MessageContainsInfo(message, info))
-                {
-                    discoveredInfo.Add(info);
-                    Debug.Log($"[Info Discovered] ✓ {info} ({discoveredInfo.Count}/{backgroundInfoToDiscover.Count})");
-                    OnInfoDiscovered?.Invoke(info);
-                    
-                    // Check if we should start closing now that we have more info
-                    if (inClosingWindow)
-                    {
-                        CheckShouldStartClosing();
-                    }
-                }
-            }
-        }
-    }
-
-    private bool MessageContainsInfo(string message, string infoTopic)
-    {
-        string lowerMessage = message.ToLower();
-        string lowerTopic = infoTopic.ToLower();
-
-        // Define keywords for each topic
-        Dictionary<string, string[]> topicKeywords = new Dictionary<string, string[]>
-        {
-            ["lives in dorms"] = new[] { "dorm", "residence hall", "live on campus" },
-            ["has roommate named jake"] = new[] { "roommate", "jake" },
-            ["works as teaching assistant"] = new[] { "ta", "teaching assistant", "teach" },
-            ["member of cs club and robotics team"] = new[] { "cs club", "computer science club", "robotics" },
-            ["enjoys hiking"] = new[] { "hiking", "hike", "trail" },
-            ["favorite campus spot"] = new[] { "favorite spot", "favorite place", "library overlooking" },
-            ["dining hall food habits"] = new[] { "dining hall", "food truck", "telegraph" },
-            ["takes bart on weekends"] = new[] { "bart", "san francisco", "explore sf" }
-        };
-
-        if (topicKeywords.TryGetValue(lowerTopic, out string[] keywords))
-        {
-            foreach (string keyword in keywords)
-            {
-                if (lowerMessage.Contains(keyword))
-                    return true;
-            }
+            LogEvent("FEEDBACK_SKIPPED", "Control condition - No feedback");
+            return;
         }
 
-        return false;
+        feedbackActive = true;
+        float feedbackStartTime = Time.time;
+        
+        // Select appropriate filler based on response preview
+        string selectedFiller = SelectAppropriateFillerWord(llmResponsePreview);
+        
+        // Verbal Filler
+        if (activeFeedbackTypes.HasFlag(FeedbackType.VerbalFiller) && ttsManager != null)
+        {
+            ttsManager.PlayFiller();
+            LogEvent("FEEDBACK_VERBAL", $"Filler: {selectedFiller}");
+        }
+
+        // Visual Cue
+        if (activeFeedbackTypes.HasFlag(FeedbackType.VisualCue))
+        {
+            ShowVisualCue();
+            LogEvent("FEEDBACK_VISUAL", "Loading icon shown");
+        }
+        
+        feedbackTimings["last_feedback_start"] = feedbackStartTime;
     }
 
-    private void CheckShouldStartClosing()
+    /// <summary>
+    /// Stop feedback when LLM response is ready
+    /// </summary>
+    public void StopFeedback()
     {
-        // Criteria for natural closing:
-        // 1. In closing window (70%+ of target time)
-        // 2. Minimum time met
-        // 3. Minimum info discovered (optional)
+        if (!enableFeedback) return;
 
-        float elapsed = (Time.time - conversationStartTime) / 60f;
-        bool minTimeMet = elapsed >= minDurationMinutes;
-        bool minInfoMet = discoveredInfo.Count >= minInfoDiscovered;
-
-        // Only require time + info, NOT exchanges
-        shouldStartClosing = minTimeMet && minInfoMet;
-
-        if (shouldStartClosing)
+        feedbackActive = false;
+        
+        if (feedbackTimings.ContainsKey("last_feedback_start"))
         {
-            Debug.Log($"[Conversation Manager] ✓ Ready to close - Time: {elapsed:F1}m, Exchanges: {exchangeCount}, Info: {discoveredInfo.Count}/{backgroundInfoToDiscover.Count}");
+            float duration = Time.time - feedbackTimings["last_feedback_start"];
+            LogEvent("FEEDBACK_STOPPED", $"Duration: {duration:F2}s");
+        }
+
+        // Visual Cue
+        if (activeFeedbackTypes.HasFlag(FeedbackType.VisualCue))
+        {
+            HideVisualCue();
         }
     }
 
     /// <summary>
-    /// Get additional system prompt for current conversation state
+    /// Intelligently select filler word based on response context
+    /// Fast selection without complex analysis
+    /// </summary>
+    private string SelectAppropriateFillerWord(string responsePreview)
+    {
+        if (string.IsNullOrEmpty(responsePreview))
+            return "um"; // Default
+
+        string lower = responsePreview.ToLower();
+        
+        // Quick keyword-based selection
+        if (lower.Contains("interesting") || lower.Contains("cool") || lower.Contains("wow"))
+            return "hmm interesting";
+        else if (lower.Contains("think") || lower.Contains("consider"))
+            return "let me think";
+        else if (lower.Contains("?"))
+            return "hmm that's a good question";
+        else if (lower.Length > 100)
+            return "let me see";
+        else
+            return "um"; // Default short filler
+    }
+
+    private void ShowVisualCue()
+    {
+        if (visualCueIndicator != null)
+        {
+            visualCueIndicator.SetActive(true);
+        }
+        
+        if (visualCueText != null && thinkingMessages.Length > 0)
+        {
+            int randomIndex = UnityEngine.Random.Range(0, thinkingMessages.Length);
+            visualCueText.text = thinkingMessages[randomIndex];
+        }
+    }
+
+    private void HideVisualCue()
+    {
+        if (visualCueIndicator != null)
+        {
+            visualCueIndicator.SetActive(false);
+        }
+    }
+
+    /// <summary>
+    /// Called by TaskManager when info is discovered
+    /// </summary>
+    private void OnInfoDiscovered(string infoTitle)
+    {
+        Debug.Log($"[Conversation] ✓ Info Discovered: {infoTitle}");
+        LogEvent("INFO_DISCOVERED", infoTitle);
+        
+        if (inClosingWindow)
+        {
+            CheckShouldStartClosing();
+        }
+    }
+
+    /// <summary>
+    /// Called by TaskManager when progress changes
+    /// </summary>
+    private void OnInfoProgressChanged(int completed, int total)
+    {
+        infoDiscoveredCount = completed;
+    }
+
+    private void CheckShouldStartClosing()
+    {
+        if (taskManager == null) return;
+
+        float elapsed = (Time.time - conversationStartTime) / 60f;
+        bool minTimeMet = elapsed >= minDurationMinutes;
+        bool minInfoMet = taskManager.HasMetMinimumInfo(minInfoDiscovered);
+
+        shouldStartClosing = minTimeMet && minInfoMet;
+
+        if (shouldStartClosing)
+        {
+            Debug.Log($"[Conversation] ✓ Ready to close - Time: {elapsed:F1}m, Info: {infoDiscoveredCount}/{taskManager.TotalTasksCount}");
+        }
+    }
+
+    /// <summary>
+    /// Get conversation state prompt for LLM context injection
     /// </summary>
     public string GetConversationStatePrompt()
     {
@@ -245,70 +366,115 @@ public class ConversationManager : MonoBehaviour
         float elapsed = (Time.time - conversationStartTime) / 60f;
         float timePercent = elapsed / targetDurationMinutes;
 
-        // Early conversation (0-40%)
         if (timePercent < 0.4f)
         {
-            return "\n[CONVERSATION START: Be warm and engaging. Ask about their background and college experience. Show genuine curiosity.]";
+            return "\n\n[CONVERSATION PHASE: Opening - Be warm, engaging, and ask questions to learn about their background and college life. Show genuine curiosity.]";
         }
-        // Middle conversation (40-70%)
         else if (timePercent < 0.7f)
         {
-            return "\n[CONVERSATION MIDDLE: Continue dialogue naturally. Share your experiences and compare with theirs. Keep the exchange flowing.]";
+            return "\n\n[CONVERSATION PHASE: Middle - Keep dialogue flowing naturally. Share your own experiences and make comparisons. Ask follow-up questions.]";
         }
-        // Closing window (70-100%)
         else if (shouldStartClosing)
         {
-            return "\n[CONVERSATION CLOSING: Start wrapping up naturally. You can suggest exchanging contact info, mention it was great talking, or express hope to chat again. Don't abruptly end - be warm and friendly.]";
+            return "\n\n[CONVERSATION PHASE: Closing - Begin wrapping up naturally. Suggest staying in touch or express that it was great talking. Be warm but prepare to conclude.]";
         }
         else
         {
-            return "\n[CONVERSATION LATE: Continue naturally but be ready to close soon once you feel the conversation has covered good ground.]";
+            return "\n\n[CONVERSATION PHASE: Late - Continue engaging but be mindful that the conversation should naturally wind down soon.]";
         }
     }
 
-    /// <summary>
-    /// Check if conversation should naturally close
-    /// </summary>
-    public bool ShouldStartClosing()
+    private void LogEvent(string eventType, string details)
     {
-        return shouldStartClosing && inClosingWindow;
-    }
-
-    /// <summary>
-    /// Get conversation stats for display/logging
-    /// </summary>
-    public ConversationStats GetStats()
-    {
-        float duration = conversationActive ? (Time.time - conversationStartTime) / 60f : 0f;
+        float timestamp = conversationActive ? (Time.time - conversationStartTime) : 0f;
         
-        return new ConversationStats
+        conversationLog.Add(new ConversationLogEntry
         {
-            durationMinutes = duration,
+            timestamp = timestamp,
+            eventType = eventType,
+            details = details,
             exchangeCount = exchangeCount,
-            infoDiscovered = discoveredInfo.Count,
-            totalInfo = backgroundInfoToDiscover.Count,
-            isInClosingWindow = inClosingWindow,
-            shouldClose = shouldStartClosing
-        };
+            infoDiscovered = infoDiscoveredCount
+        });
     }
 
-    public bool IsConversationActive => conversationActive;
-    public int ExchangeCount => exchangeCount;
-    public int InfoDiscoveredCount => discoveredInfo.Count;
+    /// <summary>
+    /// Save conversation log as CSV
+    /// </summary>
+    public void SaveConversationLog()
+    {
+        if (!Directory.Exists(logDirectory))
+        {
+            Directory.CreateDirectory(logDirectory);
+        }
+
+        string filename = $"HTI_Conversation_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+        string filepath = Path.Combine(logDirectory, filename);
+
+        try
+        {
+            StringBuilder csv = new StringBuilder();
+            
+            // Header
+            csv.AppendLine("Timestamp(s),Event Type,Details,Exchange Count,Info Discovered");
+            
+            // Data rows
+            foreach (var entry in conversationLog)
+            {
+                csv.AppendLine($"{entry.timestamp:F2},{entry.eventType},\"{entry.details}\",{entry.exchangeCount},{entry.infoDiscovered}");
+            }
+            
+            // Summary
+            float duration = conversationLog.Count > 0 ? conversationLog[conversationLog.Count - 1].timestamp : 0f;
+            int totalInfo = taskManager != null ? taskManager.TotalTasksCount : 8;
+            csv.AppendLine("");
+            csv.AppendLine("=== SUMMARY ===");
+            csv.AppendLine($"Duration (minutes),{duration / 60f:F2}");
+            csv.AppendLine($"Total Exchanges,{exchangeCount}");
+            csv.AppendLine($"Info Discovered,{infoDiscoveredCount}/{totalInfo}");
+            csv.AppendLine($"Feedback Enabled,{enableFeedback}");
+            csv.AppendLine($"Feedback Types,{(enableFeedback ? activeFeedbackTypes.ToString() : "None")}");
+
+            File.WriteAllText(filepath, csv.ToString());
+            Debug.Log($"[Conversation] ✓ Log saved: {filepath}");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[Conversation] ✗ Failed to save log: {e.Message}");
+        }
+    }
 
     [System.Serializable]
-    public struct ConversationStats
+    private struct ConversationLogEntry
     {
-        public float durationMinutes;
+        public float timestamp;
+        public string eventType;
+        public string details;
         public int exchangeCount;
         public int infoDiscovered;
-        public int totalInfo;
-        public bool isInClosingWindow;
-        public bool shouldClose;
-
-        public override string ToString()
-        {
-            return $"Duration: {durationMinutes:F1}m | Exchanges: {exchangeCount} | Info: {infoDiscovered}/{totalInfo} | Closing: {shouldClose}";
-        }
     }
+
+    // Public accessors
+    public bool IsConversationActive => conversationActive;
+    public int ExchangeCount => exchangeCount;
+    public int InfoDiscoveredCount => infoDiscoveredCount;
+    public bool EnableFeedback => enableFeedback;
+    public FeedbackType ActiveFeedbackTypes => activeFeedbackTypes;
+
+    // Context menu testing
+    [ContextMenu("Start Test Conversation")]
+    private void TestStart() => StartConversation();
+
+    [ContextMenu("End Conversation")]
+    private void TestEnd() => EndConversation("Manual end");
+
+    [ContextMenu("Test Feedback")]
+    private void TestFeedback()
+    {
+        TriggerFeedback("This is a test response");
+        Invoke(nameof(StopFeedback), 2f);
+    }
+
+    [ContextMenu("Save Log Now")]
+    private void TestSaveLog() => SaveConversationLog();
 }

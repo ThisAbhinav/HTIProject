@@ -3,30 +3,31 @@ using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
-/// UI Controller for HTI Experiment
-/// Allows test runners to select feedback mode before/during experiments
+/// Simplified UI Controller for HTI Experiment
+/// Allows test runners to toggle feedback on/off (control vs experiment condition)
 /// </summary>
 public class HTI_ExperimentController : MonoBehaviour
 {
     [Header("UI References")]
-    [SerializeField] private TMP_Dropdown feedbackModeDropdown;
-    [SerializeField] private Button applyButton;
+    [SerializeField] private Toggle feedbackToggle;
     [SerializeField] private TMP_Text statusText;
     [SerializeField] private GameObject settingsPanel;
+    [SerializeField] private TMP_Text statsText;
     
     [Header("Settings")]
     [SerializeField] private bool showSettingsAtStart = true;
     [SerializeField] private KeyCode toggleSettingsKey = KeyCode.F1;
+    [SerializeField] private KeyCode saveLogKey = KeyCode.F3;
     
-    private FeedbackModeManager feedbackManager;
+    private ConversationManager conversationManager;
 
     private void Start()
     {
-        feedbackManager = FindObjectOfType<FeedbackModeManager>();
+        conversationManager = ConversationManager.Instance;
         
-        if (feedbackManager == null)
+        if (conversationManager == null)
         {
-            Debug.LogError("[HTI Controller] FeedbackModeManager not found in scene!");
+            Debug.LogError("[HTI Controller] ConversationManager not found in scene!");
             return;
         }
 
@@ -45,54 +46,36 @@ public class HTI_ExperimentController : MonoBehaviour
         {
             settingsPanel.SetActive(!settingsPanel.activeSelf);
         }
+        
+        // Quick save log with F3
+        if (Input.GetKeyDown(saveLogKey) && conversationManager != null)
+        {
+            conversationManager.SaveConversationLog();
+            UpdateStatusText("✓ Log saved manually");
+        }
+        
+        // Update stats display
+        UpdateStatsDisplay();
     }
 
     private void SetupUI()
     {
-        // Setup dropdown
-        if (feedbackModeDropdown != null)
+        // Setup feedback toggle
+        if (feedbackToggle != null)
         {
-            feedbackModeDropdown.ClearOptions();
-            feedbackModeDropdown.AddOptions(new System.Collections.Generic.List<string>
-            {
-                "Verbal Filler",
-                "Gesture",
-                "Visual Cue",
-                "None (Control)"
-            });
-            
-            // Set to current mode
-            feedbackModeDropdown.value = (int)feedbackManager.CurrentMode;
-            feedbackModeDropdown.onValueChanged.AddListener(OnModeChanged);
-        }
-
-        // Setup apply button
-        if (applyButton != null)
-        {
-            applyButton.onClick.AddListener(OnApplyButtonClicked);
+            feedbackToggle.isOn = conversationManager.EnableFeedback;
+            feedbackToggle.onValueChanged.AddListener(OnFeedbackToggleChanged);
         }
 
         UpdateStatusText();
     }
 
-    private void OnModeChanged(int value)
+    private void OnFeedbackToggleChanged(bool enabled)
     {
-        // Preview mode change
-        UpdateStatusText($"Mode selected: {(FeedbackModeManager.FeedbackMode)value}");
-    }
-
-    private void OnApplyButtonClicked()
-    {
-        if (feedbackModeDropdown != null && feedbackManager != null)
-        {
-            int selectedMode = feedbackModeDropdown.value;
-            feedbackManager.SetFeedbackModeByIndex(selectedMode);
-            
-            UpdateStatusText($"✓ Applied: {(FeedbackModeManager.FeedbackMode)selectedMode}");
-            
-            // Log for research data
-            Debug.Log($"[HTI Experiment] Mode Changed: {(FeedbackModeManager.FeedbackMode)selectedMode} at {System.DateTime.Now}");
-        }
+        // This requires ConversationManager to have public setter
+        string condition = enabled ? "EXPERIMENT (Feedback ON)" : "CONTROL (No Feedback)";
+        UpdateStatusText($"Mode: {condition}");
+        Debug.Log($"[HTI Experiment] Condition Changed: {condition}");
     }
 
     private void UpdateStatusText(string message = null)
@@ -103,48 +86,51 @@ public class HTI_ExperimentController : MonoBehaviour
         {
             statusText.text = message;
         }
-        else if (feedbackManager != null)
+        else if (conversationManager != null)
         {
-            statusText.text = $"Current Mode: {feedbackManager.CurrentMode}";
+            string condition = conversationManager.EnableFeedback ? "Experiment" : "Control";
+            string feedbackTypes = conversationManager.EnableFeedback 
+                ? conversationManager.ActiveFeedbackTypes.ToString() 
+                : "None";
+            statusText.text = $"Condition: {condition}\nFeedback: {feedbackTypes}";
         }
+    }
+    
+    private void UpdateStatsDisplay()
+    {
+        if (statsText == null || conversationManager == null) return;
+        
+        if (!conversationManager.IsConversationActive)
+        {
+            statsText.text = "Waiting to start...";
+            return;
+        }
+        
+        statsText.text = $"Exchanges: {conversationManager.ExchangeCount}\n" +
+                        $"Info Discovered: {conversationManager.InfoDiscoveredCount}";
     }
 
     /// <summary>
-    /// Quick mode switches for testing (can be bound to keyboard shortcuts)
+    /// Manual controls for testing
     /// </summary>
-    [ContextMenu("Quick: Verbal Filler")]
-    public void SetVerbalFiller() => ApplyMode(0);
-
-    [ContextMenu("Quick: Gesture")]
-    public void SetGesture() => ApplyMode(1);
-
-    [ContextMenu("Quick: Visual Cue")]
-    public void SetVisualCue() => ApplyMode(2);
-
-    [ContextMenu("Quick: None")]
-    public void SetNone() => ApplyMode(3);
-
-    private void ApplyMode(int mode)
+    [ContextMenu("Start Conversation")]
+    public void StartConversation()
     {
-        if (feedbackManager != null)
-        {
-            feedbackManager.SetFeedbackModeByIndex(mode);
-            if (feedbackModeDropdown != null)
-                feedbackModeDropdown.value = mode;
-            UpdateStatusText();
-        }
+        if (conversationManager != null)
+            conversationManager.StartConversation();
     }
 
-    // Keyboard shortcuts for quick switching during testing
-    private void LateUpdate()
+    [ContextMenu("End Conversation")]
+    public void EndConversation()
     {
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-            SetVerbalFiller();
-        else if (Input.GetKeyDown(KeyCode.Alpha2))
-            SetGesture();
-        else if (Input.GetKeyDown(KeyCode.Alpha3))
-            SetVisualCue();
-        else if (Input.GetKeyDown(KeyCode.Alpha4))
-            SetNone();
+        if (conversationManager != null)
+            conversationManager.EndConversation("Manual end by controller");
+    }
+
+    [ContextMenu("Save Log")]
+    public void SaveLog()
+    {
+        if (conversationManager != null)
+            conversationManager.SaveConversationLog();
     }
 }

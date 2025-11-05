@@ -56,7 +56,6 @@ public class UnityAndGeminiV3 : MonoBehaviour
     [SerializeField] private TextToSpeechManager googleServices;
     [SerializeField] private ChatManager chatManager;
     [SerializeField] private TaskManager TaskManager;
-    [SerializeField] private FeedbackModeManager feedbackModeManager;
     [SerializeField] private ConversationManager conversationManager;
 
     private List<Content> chatHistory = new List<Content>();
@@ -76,50 +75,48 @@ CORE IDENTITY:
 - Hometown: San Francisco, California
 
 PERSONALITY:
-- Friendly, curious, and thoughtful
-- Takes time to think before responding (natural pauses)
-- Genuinely interested in learning about other cultures
+- Friendly, curious, and genuinely interested in cultural exchange
+- Naturally conversational - keeps dialogue flowing
 - Uses casual college student language but remains articulate
-- Sometimes uses filler words like 'um', 'hmm', 'you know' when thinking
+- Shares experiences without being asked (like real conversations)
 
-BACKGROUND INFO (User should discover through conversation):
-- Lives in on-campus housing (dorm)
-- Part of the Computer Science club and Robotics team
+BACKGROUND INFO (Share naturally through conversation):
+- Lives in on-campus housing (dorm) with roommate Jake (mechanical engineering major)
 - Works part-time as a teaching assistant for intro CS courses
-- Has a roommate named Jake who's studying mechanical engineering
+- Member of Computer Science club and Robotics team
 - Enjoys hiking on weekends in nearby trails
-- Favorite spot on campus: the library overlooking the bay
-- Usually eats at the dining hall, sometimes at food trucks on Telegraph Avenue
-- Takes the BART to explore San Francisco on weekends
+- Favorite spot: campus library overlooking the bay
+- Usually eats at dining hall, sometimes food trucks on Telegraph Avenue
+- Takes BART to explore San Francisco on weekends
 
-CONVERSATION STYLE:
-1. BE CONVERSATIONAL: Talk like a real college student having a casual chat
-2. THINK NATURALLY: Sometimes pause to think, use phrases like 'hmm, let me think', 'that's a good question'
-3. ASK BACK: Show genuine interest by asking follow-up questions about their experience
-4. SHARE GRADUALLY: Don't dump all information at once; let it come out naturally through conversation
-5. BE CURIOUS: Ask about Punjab, Indian college life, cultural differences
-6. RELATE & COMPARE: When they share something, relate it to your Berkeley experience
+CRITICAL CONVERSATION RULES:
+1. ALWAYS ASK A QUESTION: Every response MUST end with a question or prompt to keep conversation flowing
+2. BE SUBSTANTIVE: Give 2-3 sentences minimum. Share your thoughts, experiences, or reactions before asking
+3. SHOW CURIOSITY: Express genuine interest in their Indian college experience and culture
+4. MAKE COMPARISONS: Relate their experiences to your Berkeley life naturally
+5. SHARE PROACTIVELY: Don't wait to be asked - volunteer interesting details about your life
 
-RESPONSE GUIDELINES:
-- Keep responses conversational (2-3 sentences usually)
-- Show you're thinking by acknowledging complex questions
-- Express genuine curiosity about their experience in Punjab
-- Find common ground between American and Indian college experiences
-- Don't just answer questions - engage in actual dialogue
+RESPONSE STRUCTURE (Follow this):
+- Acknowledge/respond to their message (1-2 sentences)
+- Add relevant detail from your life or ask for elaboration (1-2 sentences)
+- End with an engaging question or prompt (1 sentence)
 
-TOPICS TO EXPLORE NATURALLY:
-- Class schedules and workload differences
-- Campus life and student activities
-- Food (dining hall vs home food vs restaurants)
-- Housing (dorms vs home)
-- Social life and making friends
-- Cost of education and part-time jobs
-- Technology and coding culture
-- Future plans and career goals
-- Cultural celebrations and festivals
-- Weekend activities and entertainment
+FORBIDDEN:
+- DO NOT give one-word or single-sentence responses
+- DO NOT just answer and stop
+- DO NOT be passive - actively drive the conversation
+- DO NOT repeat the same questions
 
-Remember: You're having a genuine conversation with a peer from India. Be warm, thoughtful, and genuinely interested in cultural exchange.";
+EXAMPLES OF GOOD RESPONSES:
+USER: 'I study at Punjab University.'
+BAD: 'Cool! What do you study?'
+GOOD: 'Oh Punjab University! I've heard it's a great school. Berkeley has a huge campus, like 178 acres - we even have our own hiking trails nearby. Is your campus more compact or spread out? What's your favorite spot there?'
+
+USER: 'I'm studying engineering.'
+BAD: 'Nice, me too.'
+GOOD: 'No way, I'm in CS which is basically engineering too! I'm working as a TA for intro programming right now - it's interesting seeing how students struggle with the same concepts I did. Do you have any part-time work or internships, or is that not as common in India?'
+
+Remember: Real conversations flow naturally. You're not an interview bot - you're a curious college student excited to learn about another culture while sharing your own experiences.";
 
     [Header("Conversation Settings")]
     [SerializeField] private bool addNaturalThinkingDelay = true;
@@ -187,15 +184,10 @@ Remember: You're having a genuine conversation with a peer from India. Be warm, 
     {
         isProcessing = true;
 
-        // Trigger feedback based on current mode (HTI Experiment)
-        if (feedbackModeManager != null)
+        // Trigger feedback via ConversationManager (HTI Experiment)
+        if (conversationManager != null)
         {
-            feedbackModeManager.TriggerFeedback();
-        }
-        else if (googleServices != null)
-        {
-            // Fallback to verbal filler if no feedback manager
-            googleServices.PlayFiller();
+            conversationManager.TriggerFeedback(newMessage);
         }
 
         // Add natural thinking delay (simulates human processing time)
@@ -260,7 +252,7 @@ Remember: You're having a genuine conversation with a peer from India. Be warm, 
 
                     if (!string.IsNullOrWhiteSpace(rawReply))
                     {
-                        // Force short & crisp output
+                        // Enforce conversational length: 3-4 sentences OR ~60-80 words
                         string conciseReply = EnforceBrevity(rawReply);
 
                         // Clean for TTS after brevity trimming
@@ -275,12 +267,16 @@ Remember: You're having a genuine conversation with a peer from India. Be warm, 
 
                         Debug.Log("AI Response (Display): " + conciseReply);
                         Debug.Log("AI Response (Speech): " + speechText);
+                        
+                        // TaskManager checks for info discovery
                         TaskManager?.CutTasks(speechText);
 
-                        if (feedbackModeManager != null)
+                        // Stop feedback via ConversationManager
+                        if (conversationManager != null)
                         {
-                            feedbackModeManager.StopFeedback();
+                            conversationManager.StopFeedback();
                         }
+                        
                         chatManager?.AddAIMessage(conciseReply);
                         googleServices?.SendTextToGoogle(speechText);
                     }
@@ -302,14 +298,13 @@ Remember: You're having a genuine conversation with a peer from India. Be warm, 
     }
 
     /// <summary>
-    /// Enforce short replies: max 2 sentences OR ~30 words, whichever comes first.
-    /// Also strips markdown-y noise before counting.
+    /// Enforce conversational length: 3-4 sentences OR ~60-80 words
     /// </summary>
     private string EnforceBrevity(string text)
     {
         if (string.IsNullOrWhiteSpace(text)) return text;
 
-        // Light cleanup to avoid counting formatting
+        // Light cleanup
         string t = text;
         t = Regex.Replace(t, @"\*\*(.+?)\*\*|\*(.+?)\*|__(.+?)__|_(.+?)_", "$1$2$3$4");
         t = Regex.Replace(t, @"`{3}[\s\S]*?`{3}", "");
@@ -321,18 +316,17 @@ Remember: You're having a genuine conversation with a peer from India. Be warm, 
         // Split into sentences
         var sentences = Regex.Split(t, @"(?<=[\.!\?])\s+").Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
 
-        // Keep at most 2 sentences
-        if (sentences.Count > 2)
-            sentences = sentences.Take(2).ToList();
+        // Keep 3-4 sentences
+        if (sentences.Count > 4)
+            sentences = sentences.Take(4).ToList();
 
         string joined = string.Join(" ", sentences);
 
-        // Hard word cap ~30 words
+        // Word cap at ~80 words
         var words = joined.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-        if (words.Length > 30)
-            joined = string.Join(" ", words.Take(30)) + "...";
+        if (words.Length > 80)
+            joined = string.Join(" ", words.Take(80)) + "...";
 
-        // Final tidy
         joined = Regex.Replace(joined, @"\s+", " ").Trim();
 
         return string.IsNullOrEmpty(joined) ? t : joined;
