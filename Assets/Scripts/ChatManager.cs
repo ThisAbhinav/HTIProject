@@ -76,6 +76,7 @@ public class ChatManager : MonoBehaviour
         if (string.IsNullOrWhiteSpace(message)) return;
 
         ChatMessage chatMessage = new ChatMessage("Jean", message, MessageType.AI);
+        
         AddMessageToHistory(chatMessage);
         UpdateChatDisplay();
     }

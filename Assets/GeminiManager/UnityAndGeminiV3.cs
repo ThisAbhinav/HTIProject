@@ -9,7 +9,6 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
-
 [System.Serializable]
 public class GeminiResponse
 {
@@ -46,6 +45,7 @@ public class ChatRequest
     public List<Content> contents;
 }
 
+
 public class UnityAndGeminiV3 : MonoBehaviour
 {
     [Header("Gemini API Password")]
@@ -55,7 +55,7 @@ public class UnityAndGeminiV3 : MonoBehaviour
     [Header("NPC Function")]
     [SerializeField] private TextToSpeechManager googleServices;
     [SerializeField] private ChatManager chatManager;
-
+    [SerializeField] private TaskManager TaskManager;
 
     private List<Content> chatHistory = new List<Content>();
     private bool isProcessing = false;
@@ -183,7 +183,7 @@ You study in University of Minnesota in 3rd year pursing a degree of Mechanical 
 
                         Debug.Log("AI Response (Display): " + conciseReply);
                         Debug.Log("AI Response (Speech): " + speechText);
-
+                        TaskManager?.CutTasks(speechText);
                         chatManager?.AddAIMessage(conciseReply);
                         googleServices?.SendTextToGoogle(speechText);
                     }
