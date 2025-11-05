@@ -1334,57 +1334,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!1 &63970582
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 63970584}
-  - component: {fileID: 63970583}
-  m_Layer: 0
-  m_Name: FeedbackModeManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &63970583
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 63970582}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b3ce032928a92e146aa9376f80525a47, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FeedbackModeManager
-  currentMode: 0
-  ttsManager: {fileID: 125023358}
-  gestureController: {fileID: 0}
-  visualCueController: {fileID: 0}
-  feedbackDelay: 0.1
-  minThinkingTime: 0.5
-  maxThinkingTime: 2
---- !u!4 &63970584
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 63970582}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 3.95118, y: 2.7658305, z: 3.95118}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &64114195
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -18367,7 +18316,7 @@ PrefabInstance:
     - target: {fileID: 6015506993103287062, guid: a66bfde88dbe0e846b45bc643b3e6124, type: 3}
       propertyPath: feedbackModeManager
       value: 
-      objectReference: {fileID: 63970583}
+      objectReference: {fileID: 0}
     - target: {fileID: 6790926721026085120, guid: a66bfde88dbe0e846b45bc643b3e6124, type: 3}
       propertyPath: m_LocalPosition.x
       value: 5.88037
@@ -25078,25 +25027,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c4d81fc9c45ef44381141f14b97445e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ConversationManager
+  enableFeedback: 1
+  activeFeedbackTypes: 2
+  ttsManager: {fileID: 125023358}
+  taskManager: {fileID: 388610424}
+  visualCueIndicator: {fileID: 0}
+  visualCueText: {fileID: 42662807}
   targetDurationMinutes: 10
   minDurationMinutes: 5
   maxDurationMinutes: 15
   enableTimeLimits: 1
-  minExchanges: 10
-  targetExchanges: 20
-  backgroundInfoToDiscover:
-  - Lives in dorms
-  - Has roommate named Jake
-  - Works as teaching assistant
-  - Member of CS club and Robotics team
-  - Enjoys hiking
-  - Favorite campus spot
-  - Dining hall food habits
-  - Takes BART on weekends
+  iconRotationSpeed: 180
+  thinkingMessages:
+  - Thinking...
+  - Processing...
+  - Hmm...
+  - Let me think...
   minInfoDiscovered: 3
   targetInfoDiscovered: 5
   enableNaturalClosing: 1
   closingWindowStartPercent: 0.7
+  logDirectory: Assets/ExperimentLogs
+  autoSaveOnEnd: 1
 --- !u!4 &1733919905
 Transform:
   m_ObjectHideFlags: 0
@@ -32091,6 +32043,5 @@ SceneRoots:
   - {fileID: 1127358172}
   - {fileID: 39387729}
   - {fileID: 1733919905}
-  - {fileID: 63970584}
   - {fileID: 388610425}
   - {fileID: 1238829903}
