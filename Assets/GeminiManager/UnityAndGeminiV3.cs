@@ -277,8 +277,8 @@ Remember: Real conversations flow naturally. You're not an interview bot - you'r
                             conversationManager.StopFeedback();
                         }
                         
-                        chatManager?.AddAIMessage(conciseReply);
-                        googleServices?.SendTextToGoogle(speechText);
+                        // Stream text while speaking
+                        StartCoroutine(StreamTextWhileSpeaking(conciseReply, speechText));
                     }
                     else
                     {
@@ -372,5 +372,32 @@ Remember: Real conversations flow naturally. You're not an interview bot - you'r
         text = text.Trim();
 
         return text;
+    }
+
+    private IEnumerator StreamTextWhileSpeaking(string fullText, string speechText)
+    {
+        if (string.IsNullOrWhiteSpace(fullText)) yield break;
+
+        // Break the full text into words for streaming
+        string[] words = fullText.Split(' ');
+        string streamedText = "";
+
+        // Start TTS playback slightly earlier
+        googleServices?.SendTextToGoogle(speechText);
+        yield return new WaitForSeconds(0.1f); // Small delay before text streaming
+
+        foreach (string word in words)
+        {
+            streamedText += word + " ";
+
+            // Update the chat display progressively
+            chatManager?.UpdateAIMessage(streamedText.TrimEnd());
+
+            // Reduce the delay between words for faster streaming
+            yield return new WaitForSeconds(0.15f);
+        }
+
+        // Ensure the final text is displayed completely
+        chatManager?.UpdateAIMessage(fullText);
     }
 }

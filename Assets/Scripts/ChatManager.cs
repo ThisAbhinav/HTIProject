@@ -79,6 +79,19 @@ public class ChatManager : MonoBehaviour
         UpdateChatDisplay();
     }
 
+    public void UpdateAIMessage(string message)
+    {
+        if (chatHistory.Count == 0 || chatHistory[chatHistory.Count - 1].type != MessageType.AI)
+        {
+            AddAIMessage(message);
+            return;
+        }
+
+        // Update the last AI message in the history
+        chatHistory[chatHistory.Count - 1].message = message;
+        UpdateChatDisplay();
+    }
+
     public void AddSystemMessage(string message)
     {
         ChatMessage chatMessage = new ChatMessage("System", message, MessageType.System);

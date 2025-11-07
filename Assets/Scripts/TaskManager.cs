@@ -12,14 +12,20 @@ using System;
 public class TaskManager : MonoBehaviour
 {
     [SerializeField] private GameObject TasksBox;
-    [SerializeField] private List<UserTask> tasks = new List<UserTask>();
+    [SerializeField] private List<UserTask> tasks = new()
+    {
+            new UserTask("Find out which college Alex studies at", new List<string> { "berkeley", "uc berkeley", "university of california"}),
+            new UserTask("Learn who Alex’s roommate is", new List<string> { "jake" }),
+            new UserTask("Discover what Alex does part-time", new List<string> { "teaching assistant", "ta", "intro cs", "cs ta" }),
+            new UserTask("Figure out Alex’s favorite weekend activity", new List<string> { "hiking", "hike", "trails" }),
+            new UserTask("Find out Alex’s favorite food spot", new List<string> { "telegraph avenue", "food trucks", "dining hall" }),
+            new UserTask("Learn where Alex is from", new List<string> { "san francisco", "sf" })
+        };
 
-    private Dictionary<UserTask, TextMeshProUGUI> taskTextMap = new Dictionary<UserTask, TextMeshProUGUI>();
+private Dictionary<UserTask, TextMeshProUGUI> taskTextMap = new Dictionary<UserTask, TextMeshProUGUI>();
 
-    // Events for ConversationManager to subscribe to
     public static event Action<string> OnTaskCompleted;
-    public static event Action<int, int> OnTaskProgressChanged; // (completed, total)
-
+    public static event Action<int, int> OnTaskProgressChanged; 
     public int CompletedTasksCount { get; private set; }
     public int TotalTasksCount => tasks.Count;
 
@@ -31,16 +37,6 @@ public class TaskManager : MonoBehaviour
 
     private void InitializeTaskUI()
     {
-        if (TasksBox == null) return;
-
-        RectTransform boxRect = TasksBox.GetComponent<RectTransform>();
-        boxRect.sizeDelta = new Vector2(250, 300);
-
-        ContentSizeFitter fitter = TasksBox.AddComponent<ContentSizeFitter>();
-        fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
-        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-        // Create text for each task
         foreach (UserTask task in tasks)
         {
             GameObject taskTextObj = new GameObject(task.title);
@@ -48,12 +44,12 @@ public class TaskManager : MonoBehaviour
 
             TextMeshProUGUI textComponent = taskTextObj.AddComponent<TextMeshProUGUI>();
             textComponent.text = "☐ " + task.title;
-            textComponent.fontSize = 15;
-            textComponent.color = Color.black;
+            textComponent.fontSize = 12;
+            textComponent.color = Color.white;
             textComponent.alignment = TextAlignmentOptions.Left;
 
             RectTransform rect = taskTextObj.GetComponent<RectTransform>();
-            rect.sizeDelta = new Vector2(230, 20);
+            rect.sizeDelta = new Vector2(220, 20);
 
             taskTextMap.Add(task, textComponent);
         }
@@ -125,7 +121,6 @@ public class TaskManager : MonoBehaviour
             {
                 text.text = "☐ " + task.title;
                 text.fontStyle = FontStyles.Normal;
-                text.color = Color.black;
             }
         }
         OnTaskProgressChanged?.Invoke(0, TotalTasksCount);
