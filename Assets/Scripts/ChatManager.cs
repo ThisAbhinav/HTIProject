@@ -50,7 +50,7 @@ public class ChatManager : MonoBehaviour
     private void Start()
     {
         SetupChatDisplay();
-        AddSystemMessage("Alex - UC Berkeley Student | HTI Experiment Active");
+        AddSystemMessage("Alex - Your friend From abroad | HTI Experiment");
     }
 
     private void SetupChatDisplay()

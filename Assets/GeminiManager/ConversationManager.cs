@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -17,18 +18,20 @@ public class ConversationManager : MonoBehaviour
     {
         None = 0,
         VerbalFiller = 1 << 0,      // "um", "hmm" audio fillers
-        VisualCue = 1 << 1          // Spinning/pulsing loading icon
+        VisualCueIcon = 1 << 1,         // Spinning/pulsing loading icon
+        VisualCueText = 1 << 2, // loading text
+        Guesture = 1 << 3          //  gesture feedback
     }
 
     [Header("=== EXPERIMENT CONFIGURATION ===")]
     [SerializeField] private bool enableFeedback = true; // Main control/experiment toggle
-    [SerializeField] private FeedbackType activeFeedbackTypes = FeedbackType.VerbalFiller | FeedbackType.VisualCue;
+    [SerializeField] private FeedbackType activeFeedbackTypes = FeedbackType.VerbalFiller | FeedbackType.VisualCueIcon | FeedbackType.VisualCueText | FeedbackType.Guesture;
     
     [Header("=== Component References ===")]
     [SerializeField] private TextToSpeechManager ttsManager;
     [SerializeField] private TaskManager taskManager;
-    [SerializeField] private GameObject visualCueIndicator; // Simple spinning icon
-    [SerializeField] private TMP_Text visualCueText; // "Thinking..." text
+    [SerializeField] private GameObject visualCuePrefab; 
+    [SerializeField] private TextMeshProUGUI visualCueText; // "Thinking..." text
     
     [Header("=== Timing Settings ===")]
     [SerializeField] private float targetDurationMinutes = 10f;
@@ -36,8 +39,11 @@ public class ConversationManager : MonoBehaviour
     [SerializeField] private float maxDurationMinutes = 15f;
     [SerializeField] private bool enableTimeLimits = true;
     
+    [Header("=== Feedback Delay Settings ===")]
+    [Tooltip("Delay in seconds before feedback is triggered. This doesn't delay LLM processing, only the feedback UI.")]
+    [SerializeField] private float feedbackDelay = 0.5f;
+    
     [Header("=== Visual Cue Settings ===")]
-    [SerializeField] private float iconRotationSpeed = 180f;
     [SerializeField] private string[] thinkingMessages = new string[]
     {
         "Thinking...",
@@ -68,6 +74,7 @@ public class ConversationManager : MonoBehaviour
     private bool feedbackActive = false;
     private float lastLogTime = 0f;
     private float logInterval = 60f;
+    private Coroutine feedbackCoroutine;
     
     // Logging data
     private List<ConversationLogEntry> conversationLog = new List<ConversationLogEntry>();
@@ -99,9 +106,7 @@ public class ConversationManager : MonoBehaviour
         // Subscribe to TaskManager events
         TaskManager.OnTaskCompleted += OnInfoDiscovered;
         TaskManager.OnTaskProgressChanged += OnInfoProgressChanged;
-        
-        if (visualCueIndicator != null)
-            visualCueIndicator.SetActive(false);
+        visualCuePrefab.SetActive(false);
     }
 
     private void OnDestroy()
@@ -142,12 +147,7 @@ public class ConversationManager : MonoBehaviour
         {
             EndConversation("Maximum time reached");
         }
-        
-        // Rotate visual cue icon if active
-        if (feedbackActive && visualCueIndicator != null && visualCueIndicator.activeSelf)
-        {
-            visualCueIndicator.transform.Rotate(Vector3.forward, iconRotationSpeed * Time.deltaTime);
-        }
+
     }
 
     public void StartConversation()
@@ -227,6 +227,21 @@ public class ConversationManager : MonoBehaviour
             return;
         }
 
+        // Cancel any existing feedback coroutine
+        if (feedbackCoroutine != null)
+        {
+            StopCoroutine(feedbackCoroutine);
+        }
+
+        // Start delayed feedback
+        feedbackCoroutine = StartCoroutine(TriggerFeedbackDelayed(llmResponsePreview));
+    }
+
+    private IEnumerator TriggerFeedbackDelayed(string llmResponsePreview)
+    {
+        // Wait for the specified delay
+        yield return new WaitForSeconds(feedbackDelay);
+
         feedbackActive = true;
         float feedbackStartTime = Time.time;
         
@@ -240,14 +255,22 @@ public class ConversationManager : MonoBehaviour
             LogEvent("FEEDBACK_VERBAL", $"Filler: {selectedFiller}");
         }
 
-        // Visual Cue
-        if (activeFeedbackTypes.HasFlag(FeedbackType.VisualCue))
+        // Visual Cue Icon
+        if (activeFeedbackTypes.HasFlag(FeedbackType.VisualCueIcon))
         {
-            ShowVisualCue();
-            LogEvent("FEEDBACK_VISUAL", "Loading icon shown");
+            ShowVisualCueIcon();
+            LogEvent("FEEDBACK_VISUAL_ICON", "Loading icon shown");
+        }
+
+        // Visual Cue with Text
+        if (activeFeedbackTypes.HasFlag(FeedbackType.VisualCueText))
+        {
+            ShowVisualCueText();
+            LogEvent("FEEDBACK_VISUAL_WITH_TEXT", "Loading icon with text shown");
         }
         
         feedbackTimings["last_feedback_start"] = feedbackStartTime;
+        feedbackCoroutine = null;
     }
 
     /// <summary>
@@ -257,6 +280,15 @@ public class ConversationManager : MonoBehaviour
     {
         if (!enableFeedback) return;
 
+        // Cancel delayed feedback if it hasn't started yet
+        if (feedbackCoroutine != null)
+        {
+            StopCoroutine(feedbackCoroutine);
+            feedbackCoroutine = null;
+            LogEvent("FEEDBACK_CANCELLED", "Response arrived before delay completed");
+            return;
+        }
+
         feedbackActive = false;
         
         if (feedbackTimings.ContainsKey("last_feedback_start"))
@@ -265,10 +297,15 @@ public class ConversationManager : MonoBehaviour
             LogEvent("FEEDBACK_STOPPED", $"Duration: {duration:F2}s");
         }
 
-        // Visual Cue
-        if (activeFeedbackTypes.HasFlag(FeedbackType.VisualCue))
+        // Visual Cue Icon
+        if (activeFeedbackTypes.HasFlag(FeedbackType.VisualCueIcon))
         {
-            HideVisualCue();
+            HideVisualCueIcon();
+        }
+        // Visual Cue Text
+        if (activeFeedbackTypes.HasFlag(FeedbackType.VisualCueText))
+        {
+            HideVisualCueText();
         }
     }
 
@@ -296,26 +333,25 @@ public class ConversationManager : MonoBehaviour
             return "um"; // Default short filler
     }
 
-    private void ShowVisualCue()
+    private void ShowVisualCueIcon()
     {
-        if (visualCueIndicator != null)
-        {
-            visualCueIndicator.SetActive(true);
-        }
-        
-        if (visualCueText != null && thinkingMessages.Length > 0)
-        {
-            int randomIndex = UnityEngine.Random.Range(0, thinkingMessages.Length);
-            visualCueText.text = thinkingMessages[randomIndex];
-        }
+        visualCuePrefab.SetActive(true);
+
     }
 
-    private void HideVisualCue()
+    private void ShowVisualCueText()
     {
-        if (visualCueIndicator != null)
-        {
-            visualCueIndicator.SetActive(false);
-        }
+        int randomIndex = UnityEngine.Random.Range(0, thinkingMessages.Length);
+        visualCueText.text = thinkingMessages[randomIndex];
+    }
+
+    private void HideVisualCueIcon()
+    {
+        visualCuePrefab.SetActive(false);
+    }
+    private void HideVisualCueText()
+    {
+        visualCueText.text ="";
     }
 
     /// <summary>
