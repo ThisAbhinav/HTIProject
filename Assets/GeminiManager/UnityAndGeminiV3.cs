@@ -50,7 +50,7 @@ public class UnityAndGeminiV3 : MonoBehaviour
 {
     [Header("Gemini API Password")]
     public string apiKey;
-    private string apiEndpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+    private string apiEndpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent";
 
     [Header("NPC Function")]
     [SerializeField] private TextToSpeechManager googleServices;

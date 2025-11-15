@@ -21,11 +21,15 @@ namespace GoogleTextToSpeech.Scripts
         private Action<BadRequestData> _errorReceived;
         public ReadyPlayerAvatar.VoiceHandler voiceHandler;
         private bool fillerPlayed = false;
+        private ConversationManager conversationManager;
 
         private void Start()
         {
             // Preload fillers from Resources
             LoadFillersFromResources();
+            
+            // Get reference to ConversationManager
+            conversationManager = ConversationManager.Instance;
         }
 
         /// <summary>
@@ -108,6 +112,20 @@ namespace GoogleTextToSpeech.Scripts
             voiceHandler.AudioSource.Stop();
             voiceHandler.AudioSource.clip = clip;
             voiceHandler.AudioSource.Play();
+            
+            // Notify ConversationManager that avatar started speaking
+            if (conversationManager != null)
+            {
+                conversationManager.OnAvatarStartedSpeaking();
+            }
+            
+            // Wait for audio to finish, then notify avatar stopped speaking
+            yield return new WaitWhile(() => voiceHandler.AudioSource.isPlaying);
+            
+            if (conversationManager != null)
+            {
+                conversationManager.OnAvatarFinishedSpeaking();
+            }
         }
     }
 }

@@ -20,18 +20,19 @@ public class ConversationManager : MonoBehaviour
         VerbalFiller = 1 << 0,      // "um", "hmm" audio fillers
         VisualCueIcon = 1 << 1,         // Spinning/pulsing loading icon
         VisualCueText = 1 << 2, // loading text
-        Guesture = 1 << 3          //  gesture feedback
+        Gesture = 1 << 3          //  gesture feedback (thinking animation)
     }
 
     [Header("=== EXPERIMENT CONFIGURATION ===")]
     [SerializeField] private bool enableFeedback = true; // Main control/experiment toggle
-    [SerializeField] private FeedbackType activeFeedbackTypes = FeedbackType.VerbalFiller | FeedbackType.VisualCueIcon | FeedbackType.VisualCueText | FeedbackType.Guesture;
+    [SerializeField] private FeedbackType activeFeedbackTypes = FeedbackType.VerbalFiller | FeedbackType.VisualCueIcon | FeedbackType.VisualCueText | FeedbackType.Gesture;
     
     [Header("=== Component References ===")]
     [SerializeField] private TextToSpeechManager ttsManager;
     [SerializeField] private TaskManager taskManager;
     [SerializeField] private GameObject visualCuePrefab; 
     [SerializeField] private TextMeshProUGUI visualCueText; // "Thinking..." text
+    [SerializeField] private AvatarAnimationController avatarAnimationController; // Avatar animation control
     
     [Header("=== Timing Settings ===")]
     [SerializeField] private float targetDurationMinutes = 10f;
@@ -107,6 +108,8 @@ public class ConversationManager : MonoBehaviour
         TaskManager.OnTaskCompleted += OnInfoDiscovered;
         TaskManager.OnTaskProgressChanged += OnInfoProgressChanged;
         visualCuePrefab.SetActive(false);
+        avatarAnimationController.SetIdle();
+        
     }
 
     private void OnDestroy()
@@ -195,7 +198,25 @@ public class ConversationManager : MonoBehaviour
         
         OnConversationEnd?.Invoke();
     }
+    private string SelectAppropriateFillerWord(string responsePreview)
+    {
+        if (string.IsNullOrEmpty(responsePreview))
+            return "um"; // Default
 
+        string lower = responsePreview.ToLower();
+        
+        // Quick keyword-based selection
+        if (lower.Contains("interesting") || lower.Contains("cool") || lower.Contains("wow"))
+            return "hmm interesting";
+        else if (lower.Contains("think") || lower.Contains("consider"))
+            return "let me think";
+        else if (lower.Contains("?"))
+            return "hmm that's a good question";
+        else if (lower.Length > 100)
+            return "let me see";
+        else
+            return "um"; // Default short filler
+    }
     private void OnMessageReceived(ChatMessage message)
     {
         if (!conversationActive) return;
@@ -269,6 +290,13 @@ public class ConversationManager : MonoBehaviour
             LogEvent("FEEDBACK_VISUAL_WITH_TEXT", "Loading icon with text shown");
         }
         
+        // Gesture (Thinking Animation)
+        if (activeFeedbackTypes.HasFlag(FeedbackType.Gesture))
+        {
+            ShowThinkingGesture();
+            LogEvent("FEEDBACK_GESTURE", "Thinking animation triggered");
+        }
+        
         feedbackTimings["last_feedback_start"] = feedbackStartTime;
         feedbackCoroutine = null;
     }
@@ -286,6 +314,12 @@ public class ConversationManager : MonoBehaviour
             StopCoroutine(feedbackCoroutine);
             feedbackCoroutine = null;
             LogEvent("FEEDBACK_CANCELLED", "Response arrived before delay completed");
+            
+            // Return to idle if gesture was going to be triggered
+            if (activeFeedbackTypes.HasFlag(FeedbackType.Gesture))
+            {
+                avatarAnimationController.SetIdle();
+            }
             return;
         }
 
@@ -307,30 +341,11 @@ public class ConversationManager : MonoBehaviour
         {
             HideVisualCueText();
         }
-    }
-
-    /// <summary>
-    /// Intelligently select filler word based on response context
-    /// Fast selection without complex analysis
-    /// </summary>
-    private string SelectAppropriateFillerWord(string responsePreview)
-    {
-        if (string.IsNullOrEmpty(responsePreview))
-            return "um"; // Default
-
-        string lower = responsePreview.ToLower();
-        
-        // Quick keyword-based selection
-        if (lower.Contains("interesting") || lower.Contains("cool") || lower.Contains("wow"))
-            return "hmm interesting";
-        else if (lower.Contains("think") || lower.Contains("consider"))
-            return "let me think";
-        else if (lower.Contains("?"))
-            return "hmm that's a good question";
-        else if (lower.Length > 100)
-            return "let me see";
-        else
-            return "um"; // Default short filler
+        // Gesture (Back to Idle, will transition to Talking when TTS starts)
+        if (activeFeedbackTypes.HasFlag(FeedbackType.Gesture))
+        {
+            HideThinkingGesture();
+        }
     }
 
     private void ShowVisualCueIcon()
@@ -352,6 +367,22 @@ public class ConversationManager : MonoBehaviour
     private void HideVisualCueText()
     {
         visualCueText.text ="";
+    }
+
+    private void ShowThinkingGesture()
+    {
+        if (avatarAnimationController != null)
+        {
+            avatarAnimationController.SetThinking();
+        }
+    }
+
+    private void HideThinkingGesture()
+    {
+        if (avatarAnimationController != null)
+        {
+            avatarAnimationController.SetIdle();
+        }
     }
 
     /// <summary>
@@ -513,4 +544,28 @@ public class ConversationManager : MonoBehaviour
 
     [ContextMenu("Save Log Now")]
     private void TestSaveLog() => SaveConversationLog();
+
+    /// <summary>
+    /// Called when avatar starts speaking (from TextToSpeechManager or UnityAndGeminiV3)
+    /// </summary>
+    public void OnAvatarStartedSpeaking()
+    {
+        if (avatarAnimationController != null)
+        {
+            avatarAnimationController.SetTalking();
+            LogEvent("AVATAR_TALKING", "Avatar started speaking");
+        }
+    }
+
+    /// <summary>
+    /// Called when avatar finished speaking (from TextToSpeechManager or UnityAndGeminiV3)
+    /// </summary>
+    public void OnAvatarFinishedSpeaking()
+    {
+        if (avatarAnimationController != null)
+        {
+            avatarAnimationController.SetIdle();
+            LogEvent("AVATAR_IDLE", "Avatar finished speaking");
+        }
+    }
 }
