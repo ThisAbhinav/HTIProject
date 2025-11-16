@@ -25,7 +25,9 @@ public class TaskManager : MonoBehaviour
 private Dictionary<UserTask, TextMeshProUGUI> taskTextMap = new Dictionary<UserTask, TextMeshProUGUI>();
 
     public static event Action<string> OnTaskCompleted;
-    public static event Action<int, int> OnTaskProgressChanged; 
+    public static event Action<int, int> OnTaskProgressChanged;
+    public static event Action OnAllTasksCompleted; // New event for all tasks completed
+    
     public int CompletedTasksCount { get; private set; }
     public int TotalTasksCount => tasks.Count;
 
@@ -34,7 +36,15 @@ private Dictionary<UserTask, TextMeshProUGUI> taskTextMap = new Dictionary<UserT
         InitializeTaskUI();
         CompletedTasksCount = 0;
     }
-
+    
+    /// <summary>
+    /// Check if all tasks are completed
+    /// </summary>
+    public bool AllTasksCompleted()
+    {
+        return CompletedTasksCount >= TotalTasksCount;
+    }
+    
     private void InitializeTaskUI()
     {
         foreach (UserTask task in tasks)
@@ -82,6 +92,14 @@ private Dictionary<UserTask, TextMeshProUGUI> taskTextMap = new Dictionary<UserT
                         // Notify ConversationManager
                         OnTaskCompleted?.Invoke(task.title);
                         OnTaskProgressChanged?.Invoke(CompletedTasksCount, TotalTasksCount);
+                        
+                        // Check if all tasks are completed
+                        if (CompletedTasksCount >= TotalTasksCount)
+                        {
+                            Debug.Log("[TaskManager] ✓✓✓ ALL TASKS COMPLETED! ✓✓✓");
+                            OnAllTasksCompleted?.Invoke();
+                        }
+                        
                         break;
                     }
                 }

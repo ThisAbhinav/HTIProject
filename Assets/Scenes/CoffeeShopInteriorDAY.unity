@@ -7522,7 +7522,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 2.702}
+  m_AnchoredPosition: {x: 0, y: 2.176}
   m_SizeDelta: {x: 2.25, y: 1.5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &485342108
@@ -10893,11 +10893,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1030974960, guid: abc00000000008910661298585129256, type: 3}
   m_PrefabInstance: {fileID: 775353293}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &781957662 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 100024, guid: cf9f59041405fd74fb5077dd88279f02, type: 3}
-  m_PrefabInstance: {fileID: 1660001951}
-  m_PrefabAsset: {fileID: 0}
 --- !u!224 &781957663 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 22400024, guid: cf9f59041405fd74fb5077dd88279f02, type: 3}
@@ -12923,7 +12918,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &925113200
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15394,6 +15389,11 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!1 &1134121329 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 100024, guid: cf9f59041405fd74fb5077dd88279f02, type: 3}
+  m_PrefabInstance: {fileID: 2114684146}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1138576030
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -18005,6 +18005,14 @@ PrefabInstance:
       propertyPath: m_StaticEditorFlags
       value: 2147483647
       objectReference: {fileID: 0}
+    - target: {fileID: 1030974106, guid: abc00000000007945107163107764089, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.097
+      objectReference: {fileID: 0}
+    - target: {fileID: 1030974106, guid: abc00000000007945107163107764089, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.227
+      objectReference: {fileID: 0}
     - target: {fileID: 1030974109, guid: abc00000000007945107163107764089, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
@@ -18176,7 +18184,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4283848278
-  m_fontColor: {r: 0.335849, g: 0.335849, b: 0.335849, a: 1}
+  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -18193,13 +18201,13 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 30
-  m_fontSizeBase: 30
+  m_fontSize: 25
+  m_fontSizeBase: 25
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
@@ -26165,17 +26173,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ConversationManager
   enableFeedback: 1
-  activeFeedbackTypes: 8
+  activeFeedbackTypes: 4
   ttsManager: {fileID: 125023358}
   taskManager: {fileID: 388610424}
-  visualCuePrefab: {fileID: 781957662}
-  visualCueText: {fileID: 333304535}
+  visualCuePrefab: {fileID: 1134121329}
+  visualCueText: {fileID: 1314661171}
   avatarAnimationController: {fileID: 61542687}
   targetDurationMinutes: 10
   minDurationMinutes: 5
   maxDurationMinutes: 15
   enableTimeLimits: 1
-  feedbackDelay: 1
+  feedbackDelay: 0.5
   thinkingMessages:
   - Thinking...
   - ah...
@@ -27763,7 +27771,7 @@ Transform:
   m_GameObject: {fileID: 1835049304}
   serializedVersion: 2
   m_LocalRotation: {x: 0.5858207, y: -0, z: -0, w: 0.8104408}
-  m_LocalPosition: {x: 4.24, y: -4.247, z: 1.63}
+  m_LocalPosition: {x: 4.24, y: -4.446, z: 1.174}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -31485,6 +31493,10 @@ PrefabInstance:
       propertyPath: m_LocalPosition.y
       value: 1.69
       objectReference: {fileID: 0}
+    - target: {fileID: 1767192433, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1767192434, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.814
@@ -31526,6 +31538,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1717954561962503726, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1717954561962503726, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       propertyPath: m_LocalPosition.x
       value: 3.682
       objectReference: {fileID: 0}
@@ -31564,6 +31580,14 @@ PrefabInstance:
     - target: {fileID: 1717954561962503726, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5033801203051696737, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6232745470614056090, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -33272,15 +33296,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 22400024, guid: cf9f59041405fd74fb5077dd88279f02, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.0015
+      value: 0.0012
       objectReference: {fileID: 0}
     - target: {fileID: 22400024, guid: cf9f59041405fd74fb5077dd88279f02, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.0015
+      value: 0.0012
       objectReference: {fileID: 0}
     - target: {fileID: 22400024, guid: cf9f59041405fd74fb5077dd88279f02, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.0015
+      value: 0.0012
       objectReference: {fileID: 0}
     - target: {fileID: 22400024, guid: cf9f59041405fd74fb5077dd88279f02, type: 3}
       propertyPath: m_LocalPosition.x
