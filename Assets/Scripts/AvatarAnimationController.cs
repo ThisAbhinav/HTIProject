@@ -29,16 +29,7 @@ public class AvatarAnimationController : MonoBehaviour
         // Cache hash IDs for better performance
         talkingHash = Animator.StringToHash(talkingParameterName);
         thinkingHash = Animator.StringToHash(thinkingParameterName);
-        
-        // Auto-find animator if not assigned
-        if (avatarAnimator == null)
-        {
-            avatarAnimator = GetComponent<Animator>();
-            if (avatarAnimator == null)
-            {
-                Debug.LogError("[AvatarAnimationController] No Animator found! Please assign an Animator component.");
-            }
-        }
+        avatarAnimator = GetComponent<Animator>();
     }
     
     /// <summary>
@@ -80,38 +71,7 @@ public class AvatarAnimationController : MonoBehaviour
         Debug.Log("[Avatar Animation] State: Thinking");
     }
     
-    /// <summary>
-    /// Check if the animator has the required parameters
-    /// </summary>
-    private void OnValidate()
-    {
-        if (avatarAnimator != null)
-        {
-            bool hasTalking = HasParameter(avatarAnimator, talkingParameterName, AnimatorControllerParameterType.Bool);
-            bool hasThinking = HasParameter(avatarAnimator, thinkingParameterName, AnimatorControllerParameterType.Bool);
-            
-            if (!hasTalking)
-            {
-                Debug.LogWarning($"[AvatarAnimationController] Animator is missing bool parameter: {talkingParameterName}");
-            }
-            
-            if (!hasThinking)
-            {
-                Debug.LogWarning($"[AvatarAnimationController] Animator is missing bool parameter: {thinkingParameterName}");
-            }
-        }
-    }
+
     
-    /// <summary>
-    /// Helper method to check if animator has a specific parameter
-    /// </summary>
-    private bool HasParameter(Animator animator, string paramName, AnimatorControllerParameterType type)
-    {
-        foreach (AnimatorControllerParameter param in animator.parameters)
-        {
-            if (param.name == paramName && param.type == type)
-                return true;
-        }
-        return false;
-    }
+
 }

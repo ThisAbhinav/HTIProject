@@ -32,7 +32,7 @@ public class ConversationManager : MonoBehaviour
     [SerializeField] private TextToSpeechManager ttsManager;
     [SerializeField] private TaskManager taskManager;
     [SerializeField] private GameObject visualCuePrefab; 
-    [SerializeField] private TextMeshProUGUI visualCueText; // "Thinking..." text
+    [SerializeField] private GameObject visualCueGameObject;// "Thinking..." text
     [SerializeField] private AvatarAnimationController avatarAnimationController; // Avatar animation control
     [SerializeField] private GameObject endingUIPanel; // Ending UI panel to show when conversation ends
     
@@ -382,8 +382,8 @@ public class ConversationManager : MonoBehaviour
     private void ShowVisualCueText()
     {
         int randomIndex = UnityEngine.Random.Range(0, thinkingMessages.Length);
-        visualCueText.text = thinkingMessages[randomIndex];
-        visualCueText.gameObject.SetActive(true);
+        visualCueGameObject.SetActive(true);
+        visualCueGameObject.GetComponentInChildren<TextMeshProUGUI>().text = thinkingMessages[randomIndex];
     }
 
     private void HideVisualCueIcon()
@@ -392,8 +392,7 @@ public class ConversationManager : MonoBehaviour
     }
     private void HideVisualCueText()
     {
-        visualCueText.text ="";
-        visualCueText.gameObject.SetActive(false);
+        visualCueGameObject.SetActive(false);
     }
 
     private void ShowThinkingGesture()
