@@ -12,21 +12,19 @@ using System;
 public class TaskManager : MonoBehaviour
 {
     [SerializeField] private GameObject TasksBox;
-    [SerializeField] private List<UserTask> tasks = new()
+[SerializeField] private List<UserTask> tasks = new()
     {
-            new UserTask("Find out which college Alex studies at", new List<string> { "berkeley", "uc berkeley", "university of california"}),
-            new UserTask("Learn who Alex’s roommate is", new List<string> { "jake" }),
-            new UserTask("Discover what Alex does part-time", new List<string> { "teaching assistant", "ta", "intro cs", "cs ta" }),
-            new UserTask("Figure out Alex’s favorite weekend activity", new List<string> { "hiking", "hike", "trails" }),
-            new UserTask("Find out Alex’s favorite food spot", new List<string> { "telegraph avenue", "food trucks", "dining hall" }),
-            new UserTask("Learn where Alex is from", new List<string> { "san francisco", "sf" })
-        };
+        new UserTask("Find out Alex's major", new List<string> { "computer science", "cs", "comp sci" }),
+        new UserTask("Learn which dorm Alex lives in", new List<string> { "unit 1", "blackwell", "foothill", "unit 2", "unit 3" }),
+        new UserTask("Discover Alex's favorite hobby", new List<string> { "photography", "photos", "camera" }),
+        new UserTask("Ask where the best coffee in Berkerley ", new List<string> { "caffe strada", "strada", "blue bottle" })
+    };
 
 private Dictionary<UserTask, TextMeshProUGUI> taskTextMap = new Dictionary<UserTask, TextMeshProUGUI>();
 
     public static event Action<string> OnTaskCompleted;
     public static event Action<int, int> OnTaskProgressChanged;
-    public static event Action OnAllTasksCompleted; // New event for all tasks completed
+    public static event Action OnAllTasksCompleted; 
     
     public int CompletedTasksCount { get; private set; }
     public int TotalTasksCount => tasks.Count;
@@ -65,14 +63,9 @@ private Dictionary<UserTask, TextMeshProUGUI> taskTextMap = new Dictionary<UserT
         }
     }
 
-    /// <summary>
-    /// Check avatar response for task completion keywords
-    /// Called by UnityAndGeminiV3 after each AI response
-    /// </summary>
     public void CutTasks(string avatarResponse)
     {
         if (string.IsNullOrEmpty(avatarResponse)) return;
-
         avatarResponse = avatarResponse.ToLower();
 
         foreach (UserTask task in tasks)
@@ -83,23 +76,7 @@ private Dictionary<UserTask, TextMeshProUGUI> taskTextMap = new Dictionary<UserT
                 {
                     if (avatarResponse.Contains(keyword.ToLower()))
                     {
-                        task.isCompleted = true;
-                        CompletedTasksCount++;
-                        UpdateTaskVisual(task);
-                        
-                        Debug.Log($"[TaskManager] ✓ Discovered: {task.title} ({CompletedTasksCount}/{TotalTasksCount})");
-                        
-                        // Notify ConversationManager
-                        OnTaskCompleted?.Invoke(task.title);
-                        OnTaskProgressChanged?.Invoke(CompletedTasksCount, TotalTasksCount);
-                        
-                        // Check if all tasks are completed
-                        if (CompletedTasksCount >= TotalTasksCount)
-                        {
-                            Debug.Log("[TaskManager] ✓✓✓ ALL TASKS COMPLETED! ✓✓✓");
-                            OnAllTasksCompleted?.Invoke();
-                        }
-                        
+                        CompleteTask(task, keyword); 
                         break;
                     }
                 }
@@ -107,6 +84,32 @@ private Dictionary<UserTask, TextMeshProUGUI> taskTextMap = new Dictionary<UserT
         }
     }
 
+    private void CompleteTask(UserTask task, string foundAnswer)
+    {
+        task.isCompleted = true;
+        CompletedTasksCount++;
+        
+        if (taskTextMap.TryGetValue(task, out TextMeshProUGUI text))
+        {
+            text.text = $"<s>{task.title}</s> <color=#00FF00>({foundAnswer})</color>";
+            text.color = new Color(0.8f, 0.8f, 0.8f, 1f); 
+        }
+
+        Debug.Log($"Task Completed: {task.title}");
+    }
+
+
+    public string GetTaskStatusForPrompt()
+    {
+        // Helper to tell LLM what is left
+        string status = "Tasks User needs to complete: ";
+        foreach(var t in tasks)
+        {
+            if(!t.isCompleted) status += t.title + ", ";
+        }
+        if (AllTasksCompleted()) status = "ALL TASKS COMPLETED. You can say goodbye now.";
+        return status;
+    }
     private void UpdateTaskVisual(UserTask task)
     {
         if (taskTextMap.TryGetValue(task, out TextMeshProUGUI text))
@@ -125,9 +128,7 @@ private Dictionary<UserTask, TextMeshProUGUI> taskTextMap = new Dictionary<UserT
         return CompletedTasksCount >= minRequired;
     }
 
-    /// <summary>
-    /// Reset all tasks (for testing)
-    /// </summary>
+
     [ContextMenu("Reset All Tasks")]
     public void ResetAllTasks()
     {
@@ -139,9 +140,9 @@ private Dictionary<UserTask, TextMeshProUGUI> taskTextMap = new Dictionary<UserT
             {
                 text.text = "☐ " + task.title;
                 text.fontStyle = FontStyles.Normal;
+                text.color = Color.white;
             }
         }
-        OnTaskProgressChanged?.Invoke(0, TotalTasksCount);
     }
 }
 

@@ -1,0 +1,115 @@
+Timestamp(s),Event Type,Details,Exchange Count,Info Discovered
+0.00,CONVERSATION_START,"Feedback: Gesture",0,0
+10.11,USER_MESSAGE,"Alex how are you what is your major",0,0
+10.62,FEEDBACK_GESTURE,"Thinking animation triggered",0,0
+13.08,AI_RESPONSE_FULL,"Received full JSON response",1,0
+13.08,FEEDBACK_STOPPED,"Duration: 2.46s",1,0
+14.48,AVATAR_TALKING,"Avatar started speaking",1,0
+21.50,AVATAR_IDLE,"Avatar finished speaking",1,0
+41.34,USER_MESSAGE,"to uh learn computer science and artificial intelligence",1,0
+41.85,FEEDBACK_GESTURE,"Thinking animation triggered",1,0
+43.31,AI_RESPONSE_FULL,"Received full JSON response",2,0
+43.31,FEEDBACK_STOPPED,"Duration: 1.47s",2,0
+43.83,AVATAR_TALKING,"Avatar started speaking",2,0
+43.83,AVATAR_TALKING,"Avatar started speaking",2,0
+50.68,AVATAR_IDLE,"Avatar finished speaking",2,0
+50.68,AVATAR_IDLE,"Avatar finished speaking",2,0
+59.86,USER_MESSAGE,"yes I'm very excited uh can you tell me your favorite hub",2,0
+60.36,FEEDBACK_GESTURE,"Thinking animation triggered",2,0
+61.03,AI_RESPONSE_FULL,"Received full JSON response",3,0
+61.03,FEEDBACK_STOPPED,"Duration: 0.66s",3,0
+61.77,AVATAR_TALKING,"Avatar started speaking",3,0
+61.77,AVATAR_TALKING,"Avatar started speaking",3,0
+61.77,AVATAR_TALKING,"Avatar started speaking",3,0
+70.55,AVATAR_IDLE,"Avatar finished speaking",3,0
+70.55,AVATAR_IDLE,"Avatar finished speaking",3,0
+70.55,AVATAR_IDLE,"Avatar finished speaking",3,0
+80.48,USER_MESSAGE,"I love photography",3,0
+80.99,FEEDBACK_GESTURE,"Thinking animation triggered",3,0
+81.81,AI_RESPONSE_FULL,"Received full JSON response",4,0
+81.81,FEEDBACK_STOPPED,"Duration: 0.83s",4,0
+82.49,AVATAR_TALKING,"Avatar started speaking",4,0
+82.49,AVATAR_TALKING,"Avatar started speaking",4,0
+82.49,AVATAR_TALKING,"Avatar started speaking",4,0
+82.49,AVATAR_TALKING,"Avatar started speaking",4,0
+91.51,AVATAR_IDLE,"Avatar finished speaking",4,0
+91.51,AVATAR_IDLE,"Avatar finished speaking",4,0
+91.51,AVATAR_IDLE,"Avatar finished speaking",4,0
+91.51,AVATAR_IDLE,"Avatar finished speaking",4,0
+102.70,USER_MESSAGE,"I've got my camera with me",4,0
+103.21,FEEDBACK_GESTURE,"Thinking animation triggered",4,0
+103.89,AI_RESPONSE_FULL,"Received full JSON response",5,0
+103.89,FEEDBACK_STOPPED,"Duration: 0.69s",5,0
+104.58,AVATAR_TALKING,"Avatar started speaking",5,0
+104.58,AVATAR_TALKING,"Avatar started speaking",5,0
+104.58,AVATAR_TALKING,"Avatar started speaking",5,0
+104.58,AVATAR_TALKING,"Avatar started speaking",5,0
+104.58,AVATAR_TALKING,"Avatar started speaking",5,0
+111.84,AVATAR_IDLE,"Avatar finished speaking",5,0
+111.84,AVATAR_IDLE,"Avatar finished speaking",5,0
+111.84,AVATAR_IDLE,"Avatar finished speaking",5,0
+111.84,AVATAR_IDLE,"Avatar finished speaking",5,0
+111.84,AVATAR_IDLE,"Avatar finished speaking",5,0
+117.49,USER_MESSAGE,"in the Dom in which Dom do you live in",5,0
+117.99,FEEDBACK_GESTURE,"Thinking animation triggered",5,0
+118.81,AI_RESPONSE_FULL,"Received full JSON response",6,0
+118.81,FEEDBACK_STOPPED,"Duration: 0.82s",6,0
+119.51,AVATAR_TALKING,"Avatar started speaking",6,0
+119.51,AVATAR_TALKING,"Avatar started speaking",6,0
+119.51,AVATAR_TALKING,"Avatar started speaking",6,0
+119.51,AVATAR_TALKING,"Avatar started speaking",6,0
+119.51,AVATAR_TALKING,"Avatar started speaking",6,0
+119.51,AVATAR_TALKING,"Avatar started speaking",6,0
+124.57,AVATAR_IDLE,"Avatar finished speaking",6,0
+124.57,AVATAR_IDLE,"Avatar finished speaking",6,0
+124.57,AVATAR_IDLE,"Avatar finished speaking",6,0
+124.57,AVATAR_IDLE,"Avatar finished speaking",6,0
+124.57,AVATAR_IDLE,"Avatar finished speaking",6,0
+124.57,AVATAR_IDLE,"Avatar finished speaking",6,0
+133.59,USER_MESSAGE,"living in unit 4 actually",6,0
+134.09,FEEDBACK_GESTURE,"Thinking animation triggered",6,0
+134.81,AI_RESPONSE_FULL,"Received full JSON response",7,0
+134.81,FEEDBACK_STOPPED,"Duration: 0.71s",7,0
+135.82,AVATAR_TALKING,"Avatar started speaking",7,0
+135.82,AVATAR_TALKING,"Avatar started speaking",7,0
+135.82,AVATAR_TALKING,"Avatar started speaking",7,0
+135.82,AVATAR_TALKING,"Avatar started speaking",7,0
+135.82,AVATAR_TALKING,"Avatar started speaking",7,0
+135.82,AVATAR_TALKING,"Avatar started speaking",7,0
+135.82,AVATAR_TALKING,"Avatar started speaking",7,0
+142.60,AVATAR_IDLE,"Avatar finished speaking",7,0
+142.60,AVATAR_IDLE,"Avatar finished speaking",7,0
+142.60,AVATAR_IDLE,"Avatar finished speaking",7,0
+142.60,AVATAR_IDLE,"Avatar finished speaking",7,0
+142.60,AVATAR_IDLE,"Avatar finished speaking",7,0
+142.60,AVATAR_IDLE,"Avatar finished speaking",7,0
+142.60,AVATAR_IDLE,"Avatar finished speaking",7,0
+150.80,USER_MESSAGE,"uh I'm settling okay but can you tell me where the best coffee",7,0
+151.30,FEEDBACK_GESTURE,"Thinking animation triggered",7,0
+152.27,AI_RESPONSE_FULL,"Received full JSON response",8,0
+152.27,FEEDBACK_STOPPED,"Duration: 0.97s",8,0
+153.03,AVATAR_TALKING,"Avatar started speaking",8,0
+153.03,AVATAR_TALKING,"Avatar started speaking",8,0
+153.03,AVATAR_TALKING,"Avatar started speaking",8,0
+153.03,AVATAR_TALKING,"Avatar started speaking",8,0
+153.03,AVATAR_TALKING,"Avatar started speaking",8,0
+153.03,AVATAR_TALKING,"Avatar started speaking",8,0
+153.03,AVATAR_TALKING,"Avatar started speaking",8,0
+153.03,AVATAR_TALKING,"Avatar started speaking",8,0
+162.44,AVATAR_IDLE,"Avatar finished speaking",8,0
+162.44,AVATAR_IDLE,"Avatar finished speaking",8,0
+162.44,AVATAR_IDLE,"Avatar finished speaking",8,0
+162.44,AVATAR_IDLE,"Avatar finished speaking",8,0
+162.44,AVATAR_IDLE,"Avatar finished speaking",8,0
+162.44,AVATAR_IDLE,"Avatar finished speaking",8,0
+162.44,AVATAR_IDLE,"Avatar finished speaking",8,0
+162.44,AVATAR_IDLE,"Avatar finished speaking",8,0
+0.00,CONVERSATION_END,"Reason: Objectives Met / AI Requested End | Duration: 2.72m",8,0
+
+=== SUMMARY ===
+Duration (minutes),0.00
+Total Exchanges,8
+Info Discovered,0/4
+Feedback Enabled,True
+Feedback Types,Gesture
+Feedback Delay,0.5s

@@ -1,0 +1,92 @@
+Timestamp(s),Event Type,Details,Exchange Count,Info Discovered
+0.00,CONVERSATION_START,"Feedback: VerbalFiller",0,0
+3.06,AI_RESPONSE_FULL,"Received full JSON response",1,0
+4.17,AVATAR_TALKING,"Avatar started speaking",1,0
+15.10,AVATAR_IDLE,"Avatar finished speaking",1,0
+25.76,USER_MESSAGE,"uh right now I'm in my fourth year actually which major are you in Alex",1,0
+26.26,FEEDBACK_VERBAL,"Filler: um",1,0
+27.44,AI_RESPONSE_FULL,"Received full JSON response",2,0
+27.44,FEEDBACK_STOPPED,"Duration: 1.18s",2,0
+28.22,AVATAR_TALKING,"Avatar started speaking",2,0
+28.22,AVATAR_TALKING,"Avatar started speaking",2,0
+35.13,AVATAR_IDLE,"Avatar finished speaking",2,0
+35.13,AVATAR_IDLE,"Avatar finished speaking",2,0
+51.28,USER_MESSAGE,"um I have computer science and artificial intelligence have a major and uh",2,0
+51.79,FEEDBACK_VERBAL,"Filler: um",2,0
+53.05,AI_RESPONSE_FULL,"Received full JSON response",3,0
+53.05,FEEDBACK_STOPPED,"Duration: 1.26s",3,0
+54.21,AVATAR_TALKING,"Avatar started speaking",3,0
+54.21,AVATAR_TALKING,"Avatar started speaking",3,0
+54.21,AVATAR_TALKING,"Avatar started speaking",3,0
+64.05,AVATAR_IDLE,"Avatar finished speaking",3,0
+64.05,AVATAR_IDLE,"Avatar finished speaking",3,0
+64.05,AVATAR_IDLE,"Avatar finished speaking",3,0
+77.93,USER_MESSAGE,"logged on a underwater robot",3,0
+78.43,FEEDBACK_VERBAL,"Filler: um",3,0
+79.01,AI_RESPONSE_FULL,"Received full JSON response",4,0
+79.01,FEEDBACK_STOPPED,"Duration: 0.58s",4,0
+79.77,AVATAR_TALKING,"Avatar started speaking",4,0
+79.77,AVATAR_TALKING,"Avatar started speaking",4,0
+79.77,AVATAR_TALKING,"Avatar started speaking",4,0
+79.77,AVATAR_TALKING,"Avatar started speaking",4,0
+90.76,AVATAR_IDLE,"Avatar finished speaking",4,0
+90.76,AVATAR_IDLE,"Avatar finished speaking",4,0
+90.76,AVATAR_IDLE,"Avatar finished speaking",4,0
+90.76,AVATAR_IDLE,"Avatar finished speaking",4,0
+118.47,USER_MESSAGE,"usually hang out in the mess because I like to eat a lot of food I'm also a big coffee Enthusiast can you tell me where I can get the best coffee in Berkeley",4,0
+118.97,FEEDBACK_VERBAL,"Filler: let me see",4,0
+120.24,AI_RESPONSE_FULL,"Received full JSON response",5,0
+120.24,FEEDBACK_STOPPED,"Duration: 1.26s",5,0
+121.36,AVATAR_TALKING,"Avatar started speaking",5,0
+121.36,AVATAR_TALKING,"Avatar started speaking",5,0
+121.36,AVATAR_TALKING,"Avatar started speaking",5,0
+121.36,AVATAR_TALKING,"Avatar started speaking",5,0
+121.36,AVATAR_TALKING,"Avatar started speaking",5,0
+134.53,AVATAR_IDLE,"Avatar finished speaking",5,0
+134.53,AVATAR_IDLE,"Avatar finished speaking",5,0
+134.53,AVATAR_IDLE,"Avatar finished speaking",5,0
+134.53,AVATAR_IDLE,"Avatar finished speaking",5,0
+134.53,AVATAR_IDLE,"Avatar finished speaking",5,0
+145.71,USER_MESSAGE,"I usually get Americano",5,0
+146.21,FEEDBACK_VERBAL,"Filler: um",5,0
+147.38,AI_RESPONSE_FULL,"Received full JSON response",6,0
+147.38,FEEDBACK_STOPPED,"Duration: 1.17s",6,0
+148.24,AVATAR_TALKING,"Avatar started speaking",6,0
+148.24,AVATAR_TALKING,"Avatar started speaking",6,0
+148.24,AVATAR_TALKING,"Avatar started speaking",6,0
+148.24,AVATAR_TALKING,"Avatar started speaking",6,0
+148.24,AVATAR_TALKING,"Avatar started speaking",6,0
+148.24,AVATAR_TALKING,"Avatar started speaking",6,0
+158.34,AVATAR_IDLE,"Avatar finished speaking",6,0
+158.34,AVATAR_IDLE,"Avatar finished speaking",6,0
+158.34,AVATAR_IDLE,"Avatar finished speaking",6,0
+158.34,AVATAR_IDLE,"Avatar finished speaking",6,0
+158.34,AVATAR_IDLE,"Avatar finished speaking",6,0
+158.34,AVATAR_IDLE,"Avatar finished speaking",6,0
+163.80,USER_MESSAGE,"your favorite hobby",6,0
+164.30,FEEDBACK_VERBAL,"Filler: um",6,0
+165.56,AI_RESPONSE_FULL,"Received full JSON response",7,0
+165.56,FEEDBACK_STOPPED,"Duration: 1.25s",7,0
+166.70,AVATAR_TALKING,"Avatar started speaking",7,0
+166.70,AVATAR_TALKING,"Avatar started speaking",7,0
+166.70,AVATAR_TALKING,"Avatar started speaking",7,0
+166.70,AVATAR_TALKING,"Avatar started speaking",7,0
+166.70,AVATAR_TALKING,"Avatar started speaking",7,0
+166.70,AVATAR_TALKING,"Avatar started speaking",7,0
+166.70,AVATAR_TALKING,"Avatar started speaking",7,0
+176.61,AVATAR_IDLE,"Avatar finished speaking",7,0
+176.61,AVATAR_IDLE,"Avatar finished speaking",7,0
+176.61,AVATAR_IDLE,"Avatar finished speaking",7,0
+176.61,AVATAR_IDLE,"Avatar finished speaking",7,0
+176.61,AVATAR_IDLE,"Avatar finished speaking",7,0
+176.61,AVATAR_IDLE,"Avatar finished speaking",7,0
+176.61,AVATAR_IDLE,"Avatar finished speaking",7,0
+0.00,CONVERSATION_END,"Reason: Objectives Met / AI Requested End | Duration: 2.96m",7,0
+
+=== SUMMARY ===
+Duration (minutes),0.00
+Total Exchanges,7
+Info Discovered,0/4
+Feedback Enabled,True
+Feedback Types,VerbalFiller
+Feedback Delay,0.5s

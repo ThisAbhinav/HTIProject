@@ -20,21 +20,28 @@ namespace GoogleSpeechToText.Scripts
         [SerializeField] private XRNode controllerHand = XRNode.RightHand;
         [SerializeField] private string vrButtonFeature = "triggerButton";
 
+        [Header("UI Interaction Feedback")]
+        [Tooltip("UI Object that says 'Press Button to Start Conversation'")]
+        [SerializeField] private GameObject startInstructionsUI;
+        [Tooltip("UI Object that appears when Recording (e.g., Red Mic Icon)")]
+        [SerializeField] private GameObject recordingUI;
+
         private AudioClip clip;
         private byte[] bytes;
         private bool recording = false;
         private bool wasButtonPressed = false;
-
+        private bool hasConversationStarted = false;
         // VR input device
         private InputDevice targetDevice;
         private InputFeatureUsage<bool> buttonUsage;
 
         void Start()
         {
-            if (useVRControllers)
-            {
-                InitializeVRController();
-            }
+            if (useVRControllers) InitializeVRController();
+
+            // Initial UI State
+            startInstructionsUI.SetActive(true);
+            recordingUI.SetActive(false);
         }
 
         void Update()
@@ -84,21 +91,33 @@ namespace GoogleSpeechToText.Scripts
                 }
             }
 
-            // Handle recording start
-            if (buttonPressed && !recording)
+            if (buttonPressed)
             {
-                StartRecording();
-                recording = true;
+                if (!hasConversationStarted)
+                {
+                    // Case 1: First interaction - Start Conversation
+                    StartConversationFlow();
+                }
+                else if (!recording)
+                {
+                    // Case 2: Conversation active - Start Recording
+                    StartRecording();
+                }
             }
 
             // Handle recording stop
             if (buttonReleased && recording)
             {
                 StopRecording();
-                recording = false;
             }
         }
-
+        private void StartConversationFlow()
+        {
+            hasConversationStarted = true;
+            Debug.Log("Starting Conversation...");
+            startInstructionsUI.SetActive(false);
+            geminiManager.StartIntro();
+        }
         private void InitializeVRController()
         {
             List<InputDevice> devices = new List<InputDevice>();
@@ -107,14 +126,7 @@ namespace GoogleSpeechToText.Scripts
             if (devices.Count > 0)
             {
                 targetDevice = devices[0];
-
                 buttonUsage = new InputFeatureUsage<bool>(vrButtonFeature);
-
-                Debug.Log($"VR Controller initialized: {targetDevice.name} on {controllerHand} with button: {vrButtonFeature}");
-            }
-            else
-            {
-                Debug.LogWarning($"No VR controller found for {controllerHand}");
             }
         }
 
@@ -122,22 +134,23 @@ namespace GoogleSpeechToText.Scripts
         {
             clip = Microphone.Start(null, false, 10, 44100);
             recording = true;
-            Debug.Log("Recording started...");
 
-            // Optional: Haptic feedback for VR
+            if (recordingUI != null) recordingUI.SetActive(true);
+
+            TriggerHaptic(0.1f);
+        }
+
+        private void TriggerHaptic(float duration)
+        {
             if (useVRControllers && targetDevice.isValid)
             {
                 HapticCapabilities capabilities;
-                if (targetDevice.TryGetHapticCapabilities(out capabilities))
+                if (targetDevice.TryGetHapticCapabilities(out capabilities) && capabilities.supportsImpulse)
                 {
-                    if (capabilities.supportsImpulse)
-                    {
-                        targetDevice.SendHapticImpulse(0, 0.3f, 0.1f); // Short vibration
-                    }
+                    targetDevice.SendHapticImpulse(0, 0.5f, duration);
                 }
             }
         }
-
         private byte[] EncodeAsWAV(float[] samples, int frequency, int channels)
         {
             using (var memoryStream = new MemoryStream(44 + samples.Length * 2))
@@ -170,87 +183,32 @@ namespace GoogleSpeechToText.Scripts
         {
             var position = Microphone.GetPosition(null);
             Microphone.End(null);
+
+            recordingUI.SetActive(false);
+
             var samples = new float[position * clip.channels];
             clip.GetData(samples, 0);
             bytes = EncodeAsWAV(samples, clip.frequency, clip.channels);
             recording = false;
 
-            Debug.Log("Recording stopped. Processing speech...");
+            TriggerHaptic(0.2f); 
 
-            // Optional: Haptic feedback for VR
-            if (useVRControllers && targetDevice.isValid)
-            {
-                HapticCapabilities capabilities;
-                if (targetDevice.TryGetHapticCapabilities(out capabilities))
-                {
-                    if (capabilities.supportsImpulse)
-                    {
-                        targetDevice.SendHapticImpulse(0, 0.5f, 0.2f); // Stronger vibration
-                    }
-                }
-            }
+            Debug.Log("Processing speech...");
 
             GoogleCloudSpeechToText.SendSpeechToTextRequest(bytes, apiKey,
                 (response) => {
-                    Debug.Log("Speech-to-Text Response: " + response);
                     var speechResponse = JsonUtility.FromJson<SpeechToTextResponse>(response);
-
                     if (speechResponse.results != null && speechResponse.results.Length > 0)
                     {
                         var transcript = speechResponse.results[0].alternatives[0].transcript;
-                        Debug.Log("Transcript: " + transcript);
-
-                        // Add user message to chat display FIRST
-                        if (chatManager != null)
-                        {
-                            chatManager.AddUserMessage(transcript);
-                        }
-
-                        // Then send to Gemini
-                        if (geminiManager != null)
-                        {
-                            geminiManager.SendChat(transcript);
-                        }
-                    }
-                    else
-                    {
-                        Debug.LogWarning("No speech detected in audio");
-                        if (chatManager != null)
-                        {
-                            chatManager.AddSystemMessage("No speech detected. Try speaking louder or closer to the microphone.");
-                        }
+                        if (chatManager != null) chatManager.AddUserMessage(transcript);
+                        if (geminiManager != null) geminiManager.SendChat(transcript);
                     }
                 },
                 (error) => {
-                    Debug.LogError("Speech-to-Text Error: " + error.error.message);
-                    if (chatManager != null)
-                    {
-                        chatManager.AddSystemMessage($"Speech recognition error: {error.error.message}");
-                    }
+                    Debug.LogError("STT Error: " + error.error.message);
                 });
         }
 
-        // Public methods to change settings at runtime
-        public void SetVRButton(string buttonFeatureName)
-        {
-            vrButtonFeature = buttonFeatureName;
-            buttonUsage = new InputFeatureUsage<bool>(buttonFeatureName);
-            Debug.Log($"VR button changed to: {buttonFeatureName}");
-        }
-
-        public void SetControllerHand(XRNode hand)
-        {
-            controllerHand = hand;
-            InitializeVRController();
-        }
-
-        public void ToggleVRInput(bool enabled)
-        {
-            useVRControllers = enabled;
-            if (enabled)
-            {
-                InitializeVRController();
-            }
-        }
     }
 }

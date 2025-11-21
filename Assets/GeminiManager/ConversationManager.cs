@@ -19,36 +19,37 @@ public class ConversationManager : MonoBehaviour
     {
         None = 0,
         VerbalFiller = 1 << 0,      // "um", "hmm" audio fillers
-        VisualCueIcon = 1 << 1,         // Spinning/pulsing loading icon
-        VisualCueText = 1 << 2, // loading text
-        Gesture = 1 << 3          //  gesture feedback (thinking animation)
+        VisualCueIcon = 1 << 1,     // Spinning/pulsing loading icon
+        VisualCueText = 1 << 2,     // loading text
+        Gesture = 1 << 3            // gesture feedback (thinking animation)
     }
 
     [Header("=== EXPERIMENT CONFIGURATION ===")]
     [SerializeField] private bool enableFeedback = true; // Main control/experiment toggle
     [SerializeField] private FeedbackType activeFeedbackTypes = FeedbackType.VerbalFiller | FeedbackType.VisualCueIcon | FeedbackType.VisualCueText | FeedbackType.Gesture;
-    
+
     [Header("=== Component References ===")]
     [SerializeField] private TextToSpeechManager ttsManager;
     [SerializeField] private TaskManager taskManager;
-    [SerializeField] private GameObject visualCuePrefab; 
+    [SerializeField] private GameObject visualCuePrefab;
     [SerializeField] private GameObject visualCueGameObject;// "Thinking..." text
     [SerializeField] private AvatarAnimationController avatarAnimationController; // Avatar animation control
     [SerializeField] private GameObject endingUIPanel; // Ending UI panel to show when conversation ends
-    
+
     [Header("=== Feedback Delay Settings ===")]
     [Tooltip("Delay in seconds before feedback is triggered. This doesn't delay LLM processing, only the feedback UI.")]
     [SerializeField] private float feedbackDelay = 0.5f;
-    
+
     [Header("=== Visual Cue Settings ===")]
-    [SerializeField] private string[] thinkingMessages = new string[]
+    [SerializeField]
+    private string[] thinkingMessages = new string[]
     {
         "Thinking...",
         "Processing...",
         "Hmm...",
         "Let me think..."
     };
-    
+
     [Header("=== Data Logging ===")]
     [SerializeField] private string logDirectory = "Assets/ExperimentLogs";
     [SerializeField] private bool autoSaveOnEnd = true;
@@ -58,21 +59,21 @@ public class ConversationManager : MonoBehaviour
     private int exchangeCount = 0;
     private int infoDiscoveredCount = 0;
     private bool conversationActive = false;
-    private bool inClosingWindow = false;
+    private bool endConversationQueued = false; // NEW: Flag to control ending timing
     private bool feedbackActive = false;
     private float lastLogTime = 0f;
     private float logInterval = 60f;
     private Coroutine feedbackCoroutine;
-    
+
     // Logging data
     private List<ConversationLogEntry> conversationLog = new List<ConversationLogEntry>();
     private List<ConversationExchange> conversationHistory = new List<ConversationExchange>();
     private Dictionary<string, float> feedbackTimings = new Dictionary<string, float>();
     private ConversationExchange currentExchange = null;
-    
+
     // Singleton
     public static ConversationManager Instance { get; private set; }
-    
+
     // Events
     public static event Action OnConversationStart;
     public static event Action OnConversationEnd;
@@ -92,15 +93,19 @@ public class ConversationManager : MonoBehaviour
     private void Start()
     {
         ChatManager.OnMessageAdded += OnMessageReceived;
-        
+
         // Subscribe to TaskManager events
-        TaskManager.OnTaskCompleted += OnInfoDiscovered;
-        TaskManager.OnTaskProgressChanged += OnInfoProgressChanged;
-        TaskManager.OnAllTasksCompleted += OnAllTasksCompleted;
-        
-        visualCuePrefab.SetActive(false);
-        avatarAnimationController.SetIdle();
-        
+        if (taskManager != null)
+        {
+            TaskManager.OnTaskCompleted += OnInfoDiscovered;
+            TaskManager.OnTaskProgressChanged += OnInfoProgressChanged;
+            // Note: We handle ending via the QueueConversationEnd logic now, but keeping this listener is fine
+            TaskManager.OnAllTasksCompleted += OnAllTasksCompleted;
+        }
+
+        if (visualCuePrefab != null) visualCuePrefab.SetActive(false);
+        if (avatarAnimationController != null) avatarAnimationController.SetIdle();
+
         if (endingUIPanel != null)
         {
             endingUIPanel.SetActive(false);
@@ -121,7 +126,7 @@ public class ConversationManager : MonoBehaviour
 
         float elapsed = Time.time - conversationStartTime;
         float elapsedMinutes = elapsed / 60f;
-        
+
         // Log progress every minute
         if (elapsed - lastLogTime >= logInterval)
         {
@@ -135,10 +140,12 @@ public class ConversationManager : MonoBehaviour
     {
         conversationStartTime = Time.time;
         conversationActive = true;
+        endConversationQueued = false; // Reset queue flag
         exchangeCount = 0;
         infoDiscoveredCount = 0;
         lastLogTime = 0f;
         conversationLog.Clear();
+        conversationHistory.Clear(); // Clear history
         feedbackTimings.Clear();
 
         // Reset TaskManager tasks
@@ -149,9 +156,19 @@ public class ConversationManager : MonoBehaviour
 
         string feedbackStatus = enableFeedback ? activeFeedbackTypes.ToString() : "None (Control)";
         Debug.Log($"[Conversation] ▶ STARTED | Feedback: {feedbackStatus}");
-        
+
         LogEvent("CONVERSATION_START", $"Feedback: {feedbackStatus}");
         OnConversationStart?.Invoke();
+    }
+
+    /// <summary>
+    /// NEW: Called by UnityAndGeminiV3 when JSON indicates conversation should end
+    /// or when tasks are complete.
+    /// </summary>
+    public void QueueConversationEnd()
+    {
+        Debug.Log("[Conversation] Ending Queued - Waiting for Avatar to finish speaking.");
+        endConversationQueued = true;
     }
 
     public void EndConversation(string reason)
@@ -160,27 +177,34 @@ public class ConversationManager : MonoBehaviour
 
         conversationActive = false;
         float duration = (Time.time - conversationStartTime) / 60f;
-        
+
         int totalInfo = taskManager != null ? taskManager.TotalTasksCount : 8;
         Debug.Log($"[Conversation] ■ ENDED - {reason}");
         Debug.Log($"[Stats] Duration: {duration:F2}m | Exchanges: {exchangeCount} | Info: {infoDiscoveredCount}/{totalInfo}");
-        
+
         LogEvent("CONVERSATION_END", $"Reason: {reason} | Duration: {duration:F2}m");
-        
+
+        // Show ending UI panel
+        if (endingUIPanel != null)
+        {
+            endingUIPanel.SetActive(true);
+        }
+
         if (autoSaveOnEnd)
         {
             SaveConversationLog();
         }
-        
+
         OnConversationEnd?.Invoke();
     }
+
     private string SelectAppropriateFillerWord(string responsePreview)
     {
         if (string.IsNullOrEmpty(responsePreview))
             return "um"; // Default
 
         string lower = responsePreview.ToLower();
-        
+
         // Quick keyword-based selection
         if (lower.Contains("interesting") || lower.Contains("cool") || lower.Contains("wow"))
             return "hmm interesting";
@@ -193,6 +217,7 @@ public class ConversationManager : MonoBehaviour
         else
             return "um"; // Default short filler
     }
+
     private void OnMessageReceived(ChatMessage message)
     {
         if (!conversationActive) return;
@@ -211,26 +236,31 @@ public class ConversationManager : MonoBehaviour
                 feedbackDuration = -1f,
                 feedbackCancelled = false
             };
-            
+
             LogEvent("USER_MESSAGE", message.message);
         }
-        else if (message.type == MessageType.AI)
+        // NOTE: We no longer handle AI messages here for the LOG. 
+        // We use LogFullAIResponse below to get the complete text from JSON.
+    }
+
+    /// <summary>
+    /// NEW: Called specifically to log the full, clean AI response from the JSON.
+    /// This fixes the issue where logs only contained partial streamed text.
+    /// </summary>
+    public void LogFullAIResponse(string fullText)
+    {
+        exchangeCount++;
+        LogEvent("AI_RESPONSE_FULL", "Received full JSON response");
+
+        if (currentExchange != null)
         {
-            exchangeCount++;
-            
-            // Complete the current exchange
-            if (currentExchange != null)
-            {
-                currentExchange.aiResponse = message.message;
-                currentExchange.responseTime = (Time.time - conversationStartTime) - currentExchange.timestamp;
-                conversationHistory.Add(currentExchange);
-                currentExchange = null;
-            }
-            
-            LogEvent("AI_RESPONSE", message.message);
+            currentExchange.aiResponse = fullText;
+            currentExchange.responseTime = (Time.time - conversationStartTime) - currentExchange.timestamp;
+            conversationHistory.Add(currentExchange);
+            currentExchange = null; // Reset for next turn
         }
     }
-    
+
     private IEnumerator EndAfterGoodbye()
     {
         // Wait for the goodbye message to be spoken
@@ -262,22 +292,22 @@ public class ConversationManager : MonoBehaviour
     private IEnumerator TriggerFeedbackDelayed(string llmResponsePreview)
     {
         float delayStartTime = Time.time;
-        
+
         // Wait for the specified delay
         yield return new WaitForSeconds(feedbackDelay);
 
         feedbackActive = true;
         float feedbackStartTime = Time.time;
-        
+
         // Record feedback start time in current exchange
         if (currentExchange != null)
         {
             currentExchange.feedbackStartTime = feedbackStartTime - conversationStartTime;
         }
-        
+
         // Select appropriate filler based on response preview
         string selectedFiller = SelectAppropriateFillerWord(llmResponsePreview);
-        
+
         // Verbal Filler
         if (activeFeedbackTypes.HasFlag(FeedbackType.VerbalFiller) && ttsManager != null)
         {
@@ -301,7 +331,7 @@ public class ConversationManager : MonoBehaviour
             LogEvent("FEEDBACK_VISUAL_WITH_TEXT", "Loading icon with text shown");
             if (currentExchange != null) currentExchange.feedbackTypes.Add("VisualCueText");
         }
-        
+
         // Gesture (Thinking Animation)
         if (activeFeedbackTypes.HasFlag(FeedbackType.Gesture))
         {
@@ -309,7 +339,7 @@ public class ConversationManager : MonoBehaviour
             LogEvent("FEEDBACK_GESTURE", "Thinking animation triggered");
             if (currentExchange != null) currentExchange.feedbackTypes.Add("Gesture");
         }
-        
+
         feedbackTimings["last_feedback_start"] = feedbackStartTime;
         feedbackCoroutine = null;
     }
@@ -327,13 +357,13 @@ public class ConversationManager : MonoBehaviour
             StopCoroutine(feedbackCoroutine);
             feedbackCoroutine = null;
             LogEvent("FEEDBACK_CANCELLED", "Response arrived before delay completed");
-            
+
             // Mark feedback as cancelled in current exchange
             if (currentExchange != null)
             {
                 currentExchange.feedbackCancelled = true;
             }
-            
+
             // Return to idle if gesture was going to be triggered
             if (activeFeedbackTypes.HasFlag(FeedbackType.Gesture) && avatarAnimationController != null)
             {
@@ -343,12 +373,12 @@ public class ConversationManager : MonoBehaviour
         }
 
         feedbackActive = false;
-        
+
         if (feedbackTimings.ContainsKey("last_feedback_start"))
         {
             float duration = Time.time - feedbackTimings["last_feedback_start"];
             LogEvent("FEEDBACK_STOPPED", $"Duration: {duration:F2}s");
-            
+
             // Record feedback duration in current exchange
             if (currentExchange != null)
             {
@@ -375,24 +405,26 @@ public class ConversationManager : MonoBehaviour
 
     private void ShowVisualCueIcon()
     {
-        visualCuePrefab.SetActive(true);
-
+        if (visualCuePrefab) visualCuePrefab.SetActive(true);
     }
 
     private void ShowVisualCueText()
     {
-        int randomIndex = UnityEngine.Random.Range(0, thinkingMessages.Length);
-        visualCueGameObject.SetActive(true);
-        visualCueGameObject.GetComponentInChildren<TextMeshProUGUI>().text = thinkingMessages[randomIndex];
+        if (visualCueGameObject)
+        {
+            int randomIndex = UnityEngine.Random.Range(0, thinkingMessages.Length);
+            visualCueGameObject.SetActive(true);
+            visualCueGameObject.GetComponentInChildren<TextMeshProUGUI>().text = thinkingMessages[randomIndex];
+        }
     }
 
     private void HideVisualCueIcon()
     {
-        visualCuePrefab.SetActive(false);
+        if (visualCuePrefab) visualCuePrefab.SetActive(false);
     }
     private void HideVisualCueText()
     {
-        visualCueGameObject.SetActive(false);
+        if (visualCueGameObject) visualCueGameObject.SetActive(false);
     }
 
     private void ShowThinkingGesture()
@@ -433,102 +465,19 @@ public class ConversationManager : MonoBehaviour
     /// </summary>
     private void OnAllTasksCompleted()
     {
-        Debug.Log("[Conversation] All tasks completed! Preparing to end conversation...");
+        Debug.Log("[Conversation] All tasks completed via TaskManager event.");
         LogEvent("ALL_TASKS_COMPLETED", $"All {taskManager.TotalTasksCount} tasks completed");
-        
-        // Start coroutine to wait for avatar to say goodbye, then end
-        StartCoroutine(WaitForGoodbyeThenEnd());
-    }
-    
-    /// <summary>
-    /// Wait for the avatar to naturally say goodbye based on the closing phase prompt, then end
-    /// </summary>
-    private IEnumerator WaitForGoodbyeThenEnd()
-    {
-        // Wait a bit to ensure the closing phase prompt is applied and avatar responds
-        // The GetConversationStatePrompt will return the closing phase message
-        // which will guide the avatar to say goodbye
-        yield return new WaitForSeconds(5f);
-        
-        // End the conversation
-        EndConversationWithGoodbye();
     }
 
-    /// <summary>
-    /// Check if all tasks are completed to trigger ending
-    /// </summary>
-    public bool ShouldEndConversation()
-    {
-        if (taskManager == null) return false;
-        return taskManager.CompletedTasksCount >= taskManager.TotalTasksCount;
-    }
-    
-    /// <summary>
-    /// End conversation with goodbye, show ending UI, and save log
-    /// </summary>
     public void EndConversationWithGoodbye()
     {
-        if (!conversationActive) return;
-        
-        conversationActive = false;
-        float duration = (Time.time - conversationStartTime) / 60f;
-        
-        Debug.Log($"[Conversation] ■ ENDED - All tasks completed");
-        Debug.Log($"[Stats] Duration: {duration:F2}m | Exchanges: {exchangeCount} | Info: {infoDiscoveredCount}/{taskManager.TotalTasksCount}");
-        
-        LogEvent("CONVERSATION_END", $"Reason: All tasks completed | Duration: {duration:F2}m");
-        
-        // Show ending UI panel
-        if (endingUIPanel != null)
-        {
-            endingUIPanel.SetActive(true);
-        }
-        
-        // Save log
-        if (autoSaveOnEnd)
-        {
-            SaveConversationLog();
-        }
-        
-        OnConversationEnd?.Invoke();
-    }
-
-    /// <summary>
-    /// Get conversation state prompt for LLM context injection
-    /// </summary>
-    public string GetConversationStatePrompt()
-    {
-        if (!conversationActive) return "";
-
-        // Since conversation ends when all tasks are completed, check task progress
-        float taskProgress = taskManager != null ? (float)taskManager.CompletedTasksCount / taskManager.TotalTasksCount : 0f;
-
-        if (taskProgress < 0.3f)
-        {
-            return "\n\n[CONVERSATION PHASE: Opening - Be warm, engaging, and ask questions to learn about their background and college life. Show genuine curiosity.]";
-        }
-        else if (taskProgress < 0.7f)
-        {
-            return "\n\n[CONVERSATION PHASE: Middle - Keep dialogue flowing naturally. Share your own experiences and make comparisons. Ask follow-up questions.]";
-        }
-        else if (taskProgress >= 0.7f && taskProgress < 1.0f)
-        {
-            return "\n\n[CONVERSATION PHASE: Late - Most topics covered. Continue naturally but start thinking about wrapping up the conversation.]";
-        }
-        else if (taskProgress >= 1.0f)
-        {
-            return "\n\n[CONVERSATION PHASE: Closing - All topics have been covered naturally. End with a warm goodbye, express it was nice chatting, and suggest staying in touch if appropriate.]";
-        }
-        else
-        {
-            return "\n\n[CONVERSATION PHASE: Active - Continue engaging naturally in the conversation.]";
-        }
+        EndConversation("Ended via Goodbye Sequence");
     }
 
     private void LogEvent(string eventType, string details)
     {
         float timestamp = conversationActive ? (Time.time - conversationStartTime) : 0f;
-        
+
         conversationLog.Add(new ConversationLogEntry
         {
             timestamp = timestamp,
@@ -539,9 +488,6 @@ public class ConversationManager : MonoBehaviour
         });
     }
 
-    /// <summary>
-    /// Save conversation log as CSV with complete conversation history
-    /// </summary>
     public void SaveConversationLog()
     {
         if (!Directory.Exists(logDirectory))
@@ -551,13 +497,10 @@ public class ConversationManager : MonoBehaviour
 
         string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
         string baseFilename = $"HTI_Conversation_{timestamp}";
-        
-        // Save event log
+
         SaveEventLog(Path.Combine(logDirectory, baseFilename + "_Events.csv"));
-        
-        // Save conversation history
         SaveConversationHistory(Path.Combine(logDirectory, baseFilename + "_Conversation.csv"));
-        
+
         Debug.Log($"[Conversation] ✓ Logs saved to {logDirectory}");
     }
 
@@ -566,17 +509,12 @@ public class ConversationManager : MonoBehaviour
         try
         {
             StringBuilder csv = new StringBuilder();
-            
-            // Header
             csv.AppendLine("Timestamp(s),Event Type,Details,Exchange Count,Info Discovered");
-            
-            // Data rows
             foreach (var entry in conversationLog)
             {
                 csv.AppendLine($"{entry.timestamp:F2},{entry.eventType},\"{entry.details}\",{entry.exchangeCount},{entry.infoDiscovered}");
             }
-            
-            // Summary
+
             float duration = conversationLog.Count > 0 ? conversationLog[conversationLog.Count - 1].timestamp : 0f;
             int totalInfo = taskManager != null ? taskManager.TotalTasksCount : 8;
             csv.AppendLine("");
@@ -601,20 +539,17 @@ public class ConversationManager : MonoBehaviour
         try
         {
             StringBuilder csv = new StringBuilder();
-            
-            // Header
             csv.AppendLine("Exchange #,Timestamp(s),User Message,AI Response,Response Time(s),Feedback Types Used,Feedback Delay(s),Feedback Start(s),Feedback Duration(s),Feedback Cancelled");
-            
-            // Data rows
+
             foreach (var exchange in conversationHistory)
             {
-                string feedbackTypesStr = exchange.feedbackTypes.Count > 0 
-                    ? string.Join("; ", exchange.feedbackTypes) 
+                string feedbackTypesStr = exchange.feedbackTypes.Count > 0
+                    ? string.Join("; ", exchange.feedbackTypes)
                     : "None";
-                
+
                 string userMsg = CleanForCSV(exchange.userMessage);
                 string aiMsg = CleanForCSV(exchange.aiResponse);
-                
+
                 csv.AppendLine($"{exchange.exchangeNumber}," +
                               $"{exchange.timestamp:F2}," +
                               $"\"{userMsg}\"," +
@@ -626,25 +561,11 @@ public class ConversationManager : MonoBehaviour
                               $"{(exchange.feedbackDuration >= 0 ? exchange.feedbackDuration.ToString("F2") : "N/A")}," +
                               $"{exchange.feedbackCancelled}");
             }
-            
-            // Summary
+
             csv.AppendLine("");
             csv.AppendLine("=== CONVERSATION SUMMARY ===");
             csv.AppendLine($"Total Exchanges,{conversationHistory.Count}");
             csv.AppendLine($"Average Response Time,{(conversationHistory.Count > 0 ? conversationHistory.Average(e => e.responseTime) : 0):F2}s");
-            
-            int feedbackTriggered = conversationHistory.Count(e => e.feedbackTypes.Count > 0);
-            int feedbackCancelled = conversationHistory.Count(e => e.feedbackCancelled);
-            csv.AppendLine($"Feedback Triggered,{feedbackTriggered}/{conversationHistory.Count}");
-            csv.AppendLine($"Feedback Cancelled (Fast Response),{feedbackCancelled}/{conversationHistory.Count}");
-            
-            if (conversationHistory.Any(e => e.feedbackDuration >= 0))
-            {
-                float avgFeedbackDuration = conversationHistory
-                    .Where(e => e.feedbackDuration >= 0)
-                    .Average(e => e.feedbackDuration);
-                csv.AppendLine($"Average Feedback Duration,{avgFeedbackDuration:F2}s");
-            }
 
             File.WriteAllText(filepath, csv.ToString());
         }
@@ -657,7 +578,6 @@ public class ConversationManager : MonoBehaviour
     private string CleanForCSV(string text)
     {
         if (string.IsNullOrEmpty(text)) return "";
-        // Escape quotes for CSV
         return text.Replace("\"", "\"\"");
     }
 
@@ -731,6 +651,20 @@ public class ConversationManager : MonoBehaviour
         {
             avatarAnimationController.SetIdle();
             LogEvent("AVATAR_IDLE", "Avatar finished speaking");
+
+            // NEW: Check if we need to end the conversation
+            // This ensures we only switch to the Ending UI AFTER the avatar is done talking.
+            if (endConversationQueued && conversationActive)
+            {
+                StartCoroutine(FinalEndSequence());
+            }
         }
+    }
+
+    private IEnumerator FinalEndSequence()
+    {
+        // Give a small beat after talking before cutting to black/end screen
+        yield return new WaitForSeconds(1.0f);
+        EndConversation("Objectives Met / AI Requested End");
     }
 }
