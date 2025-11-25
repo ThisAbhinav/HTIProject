@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using TMPro;
 using System;
-
+using System.Linq;
 /// <summary>
 /// Manages background information discovery tasks for HTI experiment
 /// Tracks what info has been naturally revealed during conversation
@@ -12,29 +12,60 @@ using System;
 public class TaskManager : MonoBehaviour
 {
     [SerializeField] private GameObject TasksBox;
-[SerializeField] private List<UserTask> tasks = new()
+
+    private List<UserTask> activeTasks = new List<UserTask>();
+    private Dictionary<UserTask, TextMeshProUGUI> taskTextMap = new Dictionary<UserTask, TextMeshProUGUI>();
+    private List<UserTask> masterTaskPool = new()
     {
         new UserTask("Find out Alex's major", new List<string> { "computer science", "cs", "comp sci" }),
-        new UserTask("Learn which dorm Alex lives in", new List<string> { "unit 1", "blackwell", "foothill", "unit 2", "unit 3" }),
+        new UserTask("Learn which dorm Alex lives in", new List<string> { "blackwell" }),
         new UserTask("Discover Alex's favorite hobby", new List<string> { "photography", "photos", "camera" }),
-        new UserTask("Ask where the best coffee in Berkerley ", new List<string> { "caffe strada", "strada", "blue bottle" })
+        new UserTask("Ask where the best coffee is", new List<string> { "caffe strada", "strada" }),
+        new UserTask("Find out Alex's hometown", new List<string> { "san francisco", "sf", "bay area" }),
+        new UserTask("Ask what year Alex is in", new List<string> { "senior", "4th year", "fourth year" }),
+        new UserTask("Ask about Alex's favorite food", new List<string> { "pizza", "sliver", "cheeseboard" }),
+        new UserTask("Find out which club Alex joined", new List<string> { "robotics", "ieee" }),
+        new UserTask("Ask about Alex's pet", new List<string> { "cooper", "golden retriever", "dog" }),
+        new UserTask("Learn Alex's favorite library", new List<string> { "moffitt" }),
+        new UserTask("Find out how Alex gets to class", new List<string> { "skateboard", "electric board" }),
+        new UserTask("Ask for Alex's favorite movie", new List<string> { "interstellar", "nolan" }),
+        new UserTask("Discover Alex's music taste", new List<string> { "lo-fi", "jazz", "hip hop" }),
+        new UserTask("Ask if Alex has siblings", new List<string> { "sister", "maya" }),
+        new UserTask("Find out Alex's favorite sport", new List<string> { "basketball", "warriors" }),
+        new UserTask("Ask about Alex's summer plans", new List<string> { "google", "internship" }),
+        new UserTask("Find out Alex's favorite drink (non-coffee)", new List<string> { "boba", "bubble tea", "plentea" }),
+        new UserTask("Ask who Alex's favorite professor is", new List<string> { "denero", "john denero" }),
+        new UserTask("Find out what game Alex is playing", new List<string> { "elden ring", "souls" }),
+        new UserTask("Ask for a campus landmark", new List<string> { "campanile", "clock tower" })
     };
-
-private Dictionary<UserTask, TextMeshProUGUI> taskTextMap = new Dictionary<UserTask, TextMeshProUGUI>();
 
     public static event Action<string> OnTaskCompleted;
     public static event Action<int, int> OnTaskProgressChanged;
     public static event Action OnAllTasksCompleted; 
     
     public int CompletedTasksCount { get; private set; }
-    public int TotalTasksCount => tasks.Count;
+    public int TotalTasksCount => activeTasks.Count;
 
     void Start()
     {
+        SelectRandomTasks();
         InitializeTaskUI();
         CompletedTasksCount = 0;
     }
-    
+
+    private void SelectRandomTasks()
+    {
+        // Shuffle the master pool
+        System.Random updateRandom = new System.Random();
+        List<UserTask> shuffledTasks = masterTaskPool.OrderBy(x => updateRandom.Next()).ToList();
+
+        // Take the first 4
+        activeTasks = shuffledTasks.Take(4).ToList();
+
+        Debug.Log($"Tasks selected for this session: {string.Join(", ", activeTasks.Select(t => t.title))}");
+    }
+
+
     /// <summary>
     /// Check if all tasks are completed
     /// </summary>
@@ -42,10 +73,12 @@ private Dictionary<UserTask, TextMeshProUGUI> taskTextMap = new Dictionary<UserT
     {
         return CompletedTasksCount >= TotalTasksCount;
     }
-    
     private void InitializeTaskUI()
     {
-        foreach (UserTask task in tasks)
+        foreach (Transform child in TasksBox.transform) Destroy(child.gameObject);
+        taskTextMap.Clear();
+
+        foreach (UserTask task in activeTasks)
         {
             GameObject taskTextObj = new GameObject(task.title);
             taskTextObj.transform.SetParent(TasksBox.transform, false);
@@ -62,13 +95,12 @@ private Dictionary<UserTask, TextMeshProUGUI> taskTextMap = new Dictionary<UserT
             taskTextMap.Add(task, textComponent);
         }
     }
-
     public void CutTasks(string avatarResponse)
     {
         if (string.IsNullOrEmpty(avatarResponse)) return;
         avatarResponse = avatarResponse.ToLower();
 
-        foreach (UserTask task in tasks)
+        foreach (UserTask task in activeTasks)
         {
             if (!task.isCompleted)
             {
@@ -76,7 +108,7 @@ private Dictionary<UserTask, TextMeshProUGUI> taskTextMap = new Dictionary<UserT
                 {
                     if (avatarResponse.Contains(keyword.ToLower()))
                     {
-                        CompleteTask(task, keyword); 
+                        CompleteTask(task, keyword);
                         break;
                     }
                 }
@@ -88,24 +120,28 @@ private Dictionary<UserTask, TextMeshProUGUI> taskTextMap = new Dictionary<UserT
     {
         task.isCompleted = true;
         CompletedTasksCount++;
-        
+
         if (taskTextMap.TryGetValue(task, out TextMeshProUGUI text))
         {
             text.text = $"<s>{task.title}</s> <color=#00FF00>({foundAnswer})</color>";
-            text.color = new Color(0.8f, 0.8f, 0.8f, 1f); 
+            text.color = new Color(0.8f, 0.8f, 0.8f, 1f);
         }
 
         Debug.Log($"Task Completed: {task.title}");
+
+        if (AllTasksCompleted())
+        {
+            OnAllTasksCompleted?.Invoke();
+        }
     }
 
 
     public string GetTaskStatusForPrompt()
     {
-        // Helper to tell LLM what is left
-        string status = "Tasks User needs to complete: ";
-        foreach(var t in tasks)
+        string status = "Tasks User is trying to solve (Help them naturally): ";
+        foreach (var t in activeTasks)
         {
-            if(!t.isCompleted) status += t.title + ", ";
+            if (!t.isCompleted) status += t.title + ", ";
         }
         if (AllTasksCompleted()) status = "ALL TASKS COMPLETED. You can say goodbye now.";
         return status;
@@ -132,8 +168,9 @@ private Dictionary<UserTask, TextMeshProUGUI> taskTextMap = new Dictionary<UserT
     [ContextMenu("Reset All Tasks")]
     public void ResetAllTasks()
     {
+        // For debugging, we just reset the current active ones
         CompletedTasksCount = 0;
-        foreach (UserTask task in tasks)
+        foreach (UserTask task in activeTasks)
         {
             task.isCompleted = false;
             if (taskTextMap.TryGetValue(task, out TextMeshProUGUI text))

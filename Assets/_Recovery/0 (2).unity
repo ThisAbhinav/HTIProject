@@ -2966,7 +2966,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -0.69, y: -0.904}
-  m_SizeDelta: {x: 206.25, y: 146.9}
+  m_SizeDelta: {x: 200, y: 146.9}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &176536385
 MonoBehaviour:
@@ -6151,6 +6151,33 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TaskManager
   TasksBox: {fileID: 1808072820}
+  tasks:
+  - title: Find out Alex's major
+    keywords:
+    - computer science
+    - cs
+    - comp sci
+    isCompleted: 0
+  - title: Learn which dorm Alex lives in
+    keywords:
+    - unit 1
+    - blackwell
+    - foothill
+    - unit 2
+    - unit 3
+    isCompleted: 0
+  - title: Discover Alex's favorite hobby
+    keywords:
+    - photography
+    - photos
+    - camera
+    isCompleted: 0
+  - title: 'Ask where the best coffee in Berkerley '
+    keywords:
+    - caffe strada
+    - strada
+    - blue bottle
+    isCompleted: 0
 --- !u!4 &388610425
 Transform:
   m_ObjectHideFlags: 0
@@ -9899,14 +9926,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 4ff5f30851f34dc45aa75d176e6d377b, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -14972,10 +14999,6 @@ PrefabInstance:
       propertyPath: voice
       value: 
       objectReference: {fileID: 11400000, guid: 4993497f6e362074e80440d8cf7a62c8, type: 2}
-    - target: {fileID: 946573997864022982, guid: 417c5af75b21ef24ca6f33c7590f00c8, type: 3}
-      propertyPath: fillerDelay
-      value: 0.2
-      objectReference: {fileID: 0}
     - target: {fileID: 946573997864022982, guid: 417c5af75b21ef24ca6f33c7590f00c8, type: 3}
       propertyPath: voiceHandler
       value: 
@@ -26836,7 +26859,7 @@ MonoBehaviour:
   visualCueGameObject: {fileID: 1482434767}
   avatarAnimationController: {fileID: 61542687}
   endingUIPanel: {fileID: 2145237337}
-  feedbackDelay: 0.3
+  feedbackDelay: 0.5
   thinkingMessages:
   - Thinking...
   - ah...
@@ -27723,7 +27746,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -39.4, y: 17.5}
+  m_AnchoredPosition: {x: -29.6, y: 17.5}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1786156903
@@ -28228,8 +28251,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 95.90004, y: -74.9}
-  m_SizeDelta: {x: 200, y: 128.56}
+  m_AnchoredPosition: {x: 91.654976, y: -71.88}
+  m_SizeDelta: {x: 162.21, y: 128.56}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1808072822
 MonoBehaviour:
