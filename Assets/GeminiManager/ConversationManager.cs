@@ -24,11 +24,11 @@ public class ConversationManager : MonoBehaviour
         Gesture = 1 << 3            // gesture feedback (thinking animation)
     }
 
-    [Header("=== EXPERIMENT CONFIGURATION ===")]
+    [Header("EXPERIMENT CONFIGURATION")]
     [SerializeField] private bool enableFeedback = true; // Main control/experiment toggle
     [SerializeField] private FeedbackType activeFeedbackTypes = FeedbackType.VerbalFiller | FeedbackType.VisualCueIcon | FeedbackType.VisualCueText | FeedbackType.Gesture;
 
-    [Header("=== Component References ===")]
+    [Header("COMPONENT REFERENCES")]
     [SerializeField] private TextToSpeechManager ttsManager;
     [SerializeField] private TaskManager taskManager;
     [SerializeField] private GameObject visualCuePrefab;
@@ -36,11 +36,11 @@ public class ConversationManager : MonoBehaviour
     [SerializeField] private AvatarAnimationController avatarAnimationController; // Avatar animation control
     [SerializeField] private GameObject endingUIPanel; // Ending UI panel to show when conversation ends
 
-    [Header("=== Feedback Delay Settings ===")]
+    [Header("FEEDBACK DELAY SETTINGS")]
     [Tooltip("Delay in seconds before feedback is triggered. This doesn't delay LLM processing, only the feedback UI.")]
     [SerializeField] private float feedbackDelay = 0.5f;
 
-    [Header("=== Visual Cue Settings ===")]
+    [Header("VISUAL CUE SETTINGS")]
     [SerializeField]
     private string[] thinkingMessages = new string[]
     {
@@ -50,7 +50,7 @@ public class ConversationManager : MonoBehaviour
         "Let me think..."
     };
 
-    [Header("=== Data Logging ===")]
+    [Header("DATA LOGGING")]
     [SerializeField] private string logDirectory = "Assets/ExperimentLogs";
     [SerializeField] private bool autoSaveOnEnd = true;
 
