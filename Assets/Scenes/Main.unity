@@ -26829,7 +26829,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ConversationManager
   enableFeedback: 1
-  activeFeedbackTypes: 1
+  activeFeedbackTypes: 2
   ttsManager: {fileID: 125023358}
   taskManager: {fileID: 388610424}
   visualCuePrefab: {fileID: 1134121329}

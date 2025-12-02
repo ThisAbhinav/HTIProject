@@ -1,0 +1,9 @@
+Exchange #,Timestamp(s),User Message,AI Response,Response Time(s),Feedback Types Used,Feedback Delay(s),Feedback Start(s),Feedback Duration(s),Feedback Cancelled
+2,18.25,"summer plans for the upcoming summer Alex","Oh man, I'm super excited for this summer! I managed to snag a Software Engineering Internship at Google, which I'm really looking forward to. What about you, any exciting plans for your summer break?",1.67,"VisualCueIcon",0.30,18.55,N/A,False
+3,41.84,"hey Alex what year are you in which year are you studying in at Burke","I'm currently a senior, so this is my fourth year at Berkeley. It's crazy how fast time flies! What year are you in at Plaksha?",1.48,"VisualCueIcon",0.30,42.15,N/A,False
+4,63.74,"find out uh what's your favorite sport Alex what do you like to play","My absolute favorite sport is basketball, no question. I'm a die-hard Warriors fan, so I follow them super closely. Do you have a favorite sport or a team you root for?",1.99,"VisualCueIcon",0.30,64.04,N/A,False
+5,79.95,"hobby Alex","My main hobby is photography, especially taking photos of all the cool architecture around Berkeley and SF. It's a nice way to clear my head. Do you have any hobbies you've picked up recently?",1.48,"VisualCueIcon",0.30,80.26,N/A,False
+
+=== CONVERSATION SUMMARY ===
+Total Exchanges,4
+Average Response Time,1.65s

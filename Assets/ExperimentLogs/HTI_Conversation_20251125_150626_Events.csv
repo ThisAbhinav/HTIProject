@@ -1,0 +1,59 @@
+Timestamp(s),Event Type,Details,Exchange Count,Info Discovered
+0.00,CONVERSATION_START,"Feedback: Gesture",0,0
+2.48,AI_RESPONSE_FULL,"Received full JSON response",1,0
+3.22,AVATAR_TALKING,"Avatar started speaking",1,0
+13.36,AVATAR_IDLE,"Avatar finished speaking",1,0
+21.89,USER_MESSAGE,"6 do you have any siblings and if you have where do they live what do they do",1,0
+22.20,FEEDBACK_GESTURE,"Thinking animation triggered",1,0
+23.59,AI_RESPONSE_FULL,"Received full JSON response",2,0
+23.59,FEEDBACK_STOPPED,"Duration: 1.39s",2,0
+24.21,AVATAR_TALKING,"Avatar started speaking",2,0
+24.21,AVATAR_TALKING,"Avatar started speaking",2,0
+34.24,AVATAR_IDLE,"Avatar finished speaking",2,0
+34.24,AVATAR_IDLE,"Avatar finished speaking",2,0
+50.07,USER_MESSAGE,"first Landmark then that you know about where I can ask external visitors to come",2,0
+50.38,FEEDBACK_GESTURE,"Thinking animation triggered",2,0
+51.75,AI_RESPONSE_FULL,"Received full JSON response",3,0
+51.75,FEEDBACK_STOPPED,"Duration: 1.37s",3,0
+52.42,AVATAR_TALKING,"Avatar started speaking",3,0
+52.42,AVATAR_TALKING,"Avatar started speaking",3,0
+52.42,AVATAR_TALKING,"Avatar started speaking",3,0
+66.25,AVATAR_IDLE,"Avatar finished speaking",3,0
+66.25,AVATAR_IDLE,"Avatar finished speaking",3,0
+66.25,AVATAR_IDLE,"Avatar finished speaking",3,0
+72.05,USER_MESSAGE,"favorite library on campus Alex",3,0
+72.35,FEEDBACK_GESTURE,"Thinking animation triggered",3,0
+73.61,AI_RESPONSE_FULL,"Received full JSON response",4,0
+73.61,FEEDBACK_STOPPED,"Duration: 1.25s",4,0
+74.22,AVATAR_TALKING,"Avatar started speaking",4,0
+74.22,AVATAR_TALKING,"Avatar started speaking",4,0
+74.22,AVATAR_TALKING,"Avatar started speaking",4,0
+74.22,AVATAR_TALKING,"Avatar started speaking",4,0
+86.73,AVATAR_IDLE,"Avatar finished speaking",4,0
+86.73,AVATAR_IDLE,"Avatar finished speaking",4,0
+86.73,AVATAR_IDLE,"Avatar finished speaking",4,0
+86.73,AVATAR_IDLE,"Avatar finished speaking",4,0
+92.13,USER_MESSAGE,"what's your favorite hobby specially for the weekends",4,0
+92.44,FEEDBACK_GESTURE,"Thinking animation triggered",4,0
+93.32,AI_RESPONSE_FULL,"Received full JSON response",5,0
+93.32,FEEDBACK_STOPPED,"Duration: 0.88s",5,0
+93.32,ALL_TASKS_COMPLETED,"All 4 tasks completed",5,0
+94.12,AVATAR_TALKING,"Avatar started speaking",5,0
+94.12,AVATAR_TALKING,"Avatar started speaking",5,0
+94.12,AVATAR_TALKING,"Avatar started speaking",5,0
+94.12,AVATAR_TALKING,"Avatar started speaking",5,0
+94.12,AVATAR_TALKING,"Avatar started speaking",5,0
+107.32,AVATAR_IDLE,"Avatar finished speaking",5,0
+107.32,AVATAR_IDLE,"Avatar finished speaking",5,0
+107.32,AVATAR_IDLE,"Avatar finished speaking",5,0
+107.32,AVATAR_IDLE,"Avatar finished speaking",5,0
+107.32,AVATAR_IDLE,"Avatar finished speaking",5,0
+0.00,CONVERSATION_END,"Reason: Objectives Met / AI Requested End | Duration: 1.81m",5,0
+
+=== SUMMARY ===
+Duration (minutes),0.00
+Total Exchanges,5
+Info Discovered,0/4
+Feedback Enabled,True
+Feedback Types,Gesture
+Feedback Delay,0.3s

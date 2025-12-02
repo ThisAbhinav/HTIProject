@@ -1,0 +1,75 @@
+Timestamp(s),Event Type,Details,Exchange Count,Info Discovered
+0.00,CONVERSATION_START,"Feedback: VerbalFiller",0,0
+2.14,AI_RESPONSE_FULL,"Received full JSON response",1,0
+2.98,AVATAR_TALKING,"Avatar started speaking",1,0
+12.71,AVATAR_IDLE,"Avatar finished speaking",1,0
+20.91,USER_MESSAGE,"things are going good how are you",1,0
+21.21,FEEDBACK_VERBAL,"Filler: um",1,0
+23.21,AI_RESPONSE_FULL,"Received full JSON response",2,0
+23.21,FEEDBACK_STOPPED,"Duration: 1.99s",2,0
+24.07,AVATAR_TALKING,"Avatar started speaking",2,0
+24.07,AVATAR_TALKING,"Avatar started speaking",2,0
+37.45,AVATAR_IDLE,"Avatar finished speaking",2,0
+37.45,AVATAR_IDLE,"Avatar finished speaking",2,0
+46.22,USER_MESSAGE,"let's talk about you instead what's uh what kind of music do you prefer",2,0
+46.53,FEEDBACK_VERBAL,"Filler: um",2,0
+48.10,AI_RESPONSE_FULL,"Received full JSON response",3,0
+48.10,FEEDBACK_STOPPED,"Duration: 1.57s",3,0
+49.13,AVATAR_TALKING,"Avatar started speaking",3,0
+49.13,AVATAR_TALKING,"Avatar started speaking",3,0
+49.13,AVATAR_TALKING,"Avatar started speaking",3,0
+61.20,AVATAR_IDLE,"Avatar finished speaking",3,0
+61.20,AVATAR_IDLE,"Avatar finished speaking",3,0
+61.20,AVATAR_IDLE,"Avatar finished speaking",3,0
+64.53,USER_MESSAGE,"food Alex",3,0
+64.84,FEEDBACK_VERBAL,"Filler: um",3,0
+66.16,AI_RESPONSE_FULL,"Received full JSON response",4,0
+66.16,FEEDBACK_STOPPED,"Duration: 1.32s",4,0
+67.15,AVATAR_TALKING,"Avatar started speaking",4,0
+67.15,AVATAR_TALKING,"Avatar started speaking",4,0
+67.15,AVATAR_TALKING,"Avatar started speaking",4,0
+67.15,AVATAR_TALKING,"Avatar started speaking",4,0
+78.52,AVATAR_IDLE,"Avatar finished speaking",4,0
+78.52,AVATAR_IDLE,"Avatar finished speaking",4,0
+78.52,AVATAR_IDLE,"Avatar finished speaking",4,0
+78.52,AVATAR_IDLE,"Avatar finished speaking",4,0
+81.41,USER_MESSAGE,"to have a pet",4,0
+81.72,FEEDBACK_VERBAL,"Filler: um",4,0
+82.68,AI_RESPONSE_FULL,"Received full JSON response",5,0
+82.68,FEEDBACK_STOPPED,"Duration: 0.96s",5,0
+83.63,AVATAR_TALKING,"Avatar started speaking",5,0
+83.63,AVATAR_TALKING,"Avatar started speaking",5,0
+83.63,AVATAR_TALKING,"Avatar started speaking",5,0
+83.63,AVATAR_TALKING,"Avatar started speaking",5,0
+83.63,AVATAR_TALKING,"Avatar started speaking",5,0
+94.75,AVATAR_IDLE,"Avatar finished speaking",5,0
+94.75,AVATAR_IDLE,"Avatar finished speaking",5,0
+94.75,AVATAR_IDLE,"Avatar finished speaking",5,0
+94.75,AVATAR_IDLE,"Avatar finished speaking",5,0
+94.75,AVATAR_IDLE,"Avatar finished speaking",5,0
+98.56,USER_MESSAGE,"Professor Alex",5,0
+98.87,FEEDBACK_VERBAL,"Filler: um",5,0
+100.02,AI_RESPONSE_FULL,"Received full JSON response",6,0
+100.02,FEEDBACK_STOPPED,"Duration: 1.16s",6,0
+100.02,ALL_TASKS_COMPLETED,"All 4 tasks completed",6,0
+101.29,AVATAR_TALKING,"Avatar started speaking",6,0
+101.29,AVATAR_TALKING,"Avatar started speaking",6,0
+101.29,AVATAR_TALKING,"Avatar started speaking",6,0
+101.29,AVATAR_TALKING,"Avatar started speaking",6,0
+101.29,AVATAR_TALKING,"Avatar started speaking",6,0
+101.29,AVATAR_TALKING,"Avatar started speaking",6,0
+113.53,AVATAR_IDLE,"Avatar finished speaking",6,0
+113.53,AVATAR_IDLE,"Avatar finished speaking",6,0
+113.53,AVATAR_IDLE,"Avatar finished speaking",6,0
+113.53,AVATAR_IDLE,"Avatar finished speaking",6,0
+113.53,AVATAR_IDLE,"Avatar finished speaking",6,0
+113.53,AVATAR_IDLE,"Avatar finished speaking",6,0
+0.00,CONVERSATION_END,"Reason: Objectives Met / AI Requested End | Duration: 1.91m",6,0
+
+=== SUMMARY ===
+Duration (minutes),0.00
+Total Exchanges,6
+Info Discovered,0/4
+Feedback Enabled,True
+Feedback Types,VerbalFiller
+Feedback Delay,0.3s

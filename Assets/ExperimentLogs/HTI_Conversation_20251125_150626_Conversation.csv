@@ -1,0 +1,9 @@
+Exchange #,Timestamp(s),User Message,AI Response,Response Time(s),Feedback Types Used,Feedback Delay(s),Feedback Start(s),Feedback Duration(s),Feedback Cancelled
+2,21.89,"6 do you have any siblings and if you have where do they live what do they do","Yeah, I actually have one younger sister named Maya. She's back home in San Francisco, still in high school, figuring things out. Do you have any siblings yourself?",1.70,"Gesture",0.30,22.20,N/A,False
+3,50.07,"first Landmark then that you know about where I can ask external visitors to come","Oh, definitely the Campanile, our iconic clock tower. It's super tall and you can see it from all over campus, even get a view of the whole Bay Area from the top. Have you explored any cool landmarks here at Plaksha yet?",1.68,"Gesture",0.30,50.38,N/A,False
+4,72.05,"favorite library on campus Alex","My go-to is Moffitt Library. It's really convenient because it's open 24/7, which is a lifesaver during finals week. Do you have a favorite spot on campus where you like to study or just hang out?",1.56,"Gesture",0.30,72.35,N/A,False
+5,92.13,"what's your favorite hobby specially for the weekends","I actually really enjoy photography, especially taking photos of architecture around campus and in SF. There are so many unique buildings to capture. What kind of things do you usually get up to on the weekends?",1.18,"Gesture",0.30,92.44,N/A,False
+
+=== CONVERSATION SUMMARY ===
+Total Exchanges,4
+Average Response Time,1.53s

@@ -1,0 +1,59 @@
+Timestamp(s),Event Type,Details,Exchange Count,Info Discovered
+0.00,CONVERSATION_START,"Feedback: VerbalFiller",0,0
+2.27,AI_RESPONSE_FULL,"Received full JSON response",1,0
+3.29,AVATAR_TALKING,"Avatar started speaking",1,0
+16.48,AVATAR_IDLE,"Avatar finished speaking",1,0
+31.81,USER_MESSAGE,"doing very well just busy with the conference these days so what are the new clubs that you have joined at Berkeley",1,0
+32.11,FEEDBACK_VERBAL,"Filler: let me see",1,0
+34.31,AI_RESPONSE_FULL,"Received full JSON response",2,0
+34.31,FEEDBACK_STOPPED,"Duration: 2.20s",2,0
+35.30,AVATAR_TALKING,"Avatar started speaking",2,0
+35.30,AVATAR_TALKING,"Avatar started speaking",2,0
+48.26,AVATAR_IDLE,"Avatar finished speaking",2,0
+48.26,AVATAR_IDLE,"Avatar finished speaking",2,0
+66.44,USER_MESSAGE,"good good uh what's your favorite library to hang out uh and which library has the you know the really good engineering book",2,0
+66.75,FEEDBACK_VERBAL,"Filler: let me see",2,0
+68.17,AI_RESPONSE_FULL,"Received full JSON response",3,0
+68.17,FEEDBACK_STOPPED,"Duration: 1.42s",3,0
+68.99,AVATAR_TALKING,"Avatar started speaking",3,0
+68.99,AVATAR_TALKING,"Avatar started speaking",3,0
+68.99,AVATAR_TALKING,"Avatar started speaking",3,0
+88.08,AVATAR_IDLE,"Avatar finished speaking",3,0
+88.08,AVATAR_IDLE,"Avatar finished speaking",3,0
+88.08,AVATAR_IDLE,"Avatar finished speaking",3,0
+99.97,USER_MESSAGE,"out at many spots but I'm more curious to know which dorm do you live in and which side of Campus is it on",3,0
+100.28,FEEDBACK_VERBAL,"Filler: let me see",3,0
+101.60,AI_RESPONSE_FULL,"Received full JSON response",4,0
+101.60,FEEDBACK_STOPPED,"Duration: 1.32s",4,0
+102.65,AVATAR_TALKING,"Avatar started speaking",4,0
+102.65,AVATAR_TALKING,"Avatar started speaking",4,0
+102.65,AVATAR_TALKING,"Avatar started speaking",4,0
+102.65,AVATAR_TALKING,"Avatar started speaking",4,0
+114.79,AVATAR_IDLE,"Avatar finished speaking",4,0
+114.79,AVATAR_IDLE,"Avatar finished speaking",4,0
+114.79,AVATAR_IDLE,"Avatar finished speaking",4,0
+114.79,AVATAR_IDLE,"Avatar finished speaking",4,0
+126.98,USER_MESSAGE,"good campus Landmark to know about and you know to meet people especially visitors",4,0
+127.28,FEEDBACK_VERBAL,"Filler: um",4,0
+128.61,AI_RESPONSE_FULL,"Received full JSON response",5,0
+128.61,FEEDBACK_STOPPED,"Duration: 1.32s",5,0
+128.61,ALL_TASKS_COMPLETED,"All 4 tasks completed",5,0
+129.43,AVATAR_TALKING,"Avatar started speaking",5,0
+129.43,AVATAR_TALKING,"Avatar started speaking",5,0
+129.43,AVATAR_TALKING,"Avatar started speaking",5,0
+129.43,AVATAR_TALKING,"Avatar started speaking",5,0
+129.43,AVATAR_TALKING,"Avatar started speaking",5,0
+143.41,AVATAR_IDLE,"Avatar finished speaking",5,0
+143.41,AVATAR_IDLE,"Avatar finished speaking",5,0
+143.41,AVATAR_IDLE,"Avatar finished speaking",5,0
+143.41,AVATAR_IDLE,"Avatar finished speaking",5,0
+143.41,AVATAR_IDLE,"Avatar finished speaking",5,0
+0.00,CONVERSATION_END,"Reason: Objectives Met / AI Requested End | Duration: 2.41m",5,0
+
+=== SUMMARY ===
+Duration (minutes),0.00
+Total Exchanges,5
+Info Discovered,0/4
+Feedback Enabled,True
+Feedback Types,VerbalFiller
+Feedback Delay,0.3s

@@ -1,0 +1,10 @@
+Exchange #,Timestamp(s),User Message,AI Response,Response Time(s),Feedback Types Used,Feedback Delay(s),Feedback Start(s),Feedback Duration(s),Feedback Cancelled
+2,20.91,"things are going good how are you","I'm doing great, a bit tired from the travel but super excited to catch up! Berkeley's been... Berkeley, you know, a lot of coding and late nights. What's been the biggest surprise for you at Plaksha so far?",2.30,"VerbalFiller",0.30,21.21,N/A,False
+3,46.22,"let's talk about you instead what's uh what kind of music do you prefer","Oh, for studying, I'm all about lo-fi and jazz – keeps me focused without being too distracting. When I'm not studying, it varies a lot though! What kind of music do you usually listen to while working?",1.88,"VerbalFiller",0.30,46.53,N/A,False
+4,64.53,"food Alex","Food? Definitely pizza! There are a couple of legendary spots near campus, Sliver and Cheeseboard, that I can't get enough of. What kind of food have you been enjoying most around Mohali?",1.63,"VerbalFiller",0.30,64.84,N/A,False
+5,81.41,"to have a pet","Yeah, I do! My family has a Golden Retriever named Cooper back home in San Francisco. I miss him a lot while I'm at school. Do you have any pets, or did you ever have one?",1.27,"VerbalFiller",0.30,81.72,N/A,False
+6,98.56,"Professor Alex","Ah, professors! Definitely John DeNero, he's a legend in the CS department, especially for our intro class, CS 61A. His lectures are always super engaging. Do you have a favorite professor at Plaksha?",1.46,"VerbalFiller",0.30,98.87,N/A,False
+
+=== CONVERSATION SUMMARY ===
+Total Exchanges,5
+Average Response Time,1.71s

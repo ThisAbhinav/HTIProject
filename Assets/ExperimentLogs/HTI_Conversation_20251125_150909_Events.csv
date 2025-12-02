@@ -1,0 +1,59 @@
+Timestamp(s),Event Type,Details,Exchange Count,Info Discovered
+0.00,CONVERSATION_START,"Feedback: VisualCueIcon",0,0
+2.24,AI_RESPONSE_FULL,"Received full JSON response",1,0
+3.04,AVATAR_TALKING,"Avatar started speaking",1,0
+12.59,AVATAR_IDLE,"Avatar finished speaking",1,0
+18.25,USER_MESSAGE,"summer plans for the upcoming summer Alex",1,0
+18.55,FEEDBACK_VISUAL_ICON,"Loading icon shown",1,0
+19.92,AI_RESPONSE_FULL,"Received full JSON response",2,0
+19.92,FEEDBACK_STOPPED,"Duration: 1.36s",2,0
+20.71,AVATAR_TALKING,"Avatar started speaking",2,0
+20.71,AVATAR_TALKING,"Avatar started speaking",2,0
+32.80,AVATAR_IDLE,"Avatar finished speaking",2,0
+32.80,AVATAR_IDLE,"Avatar finished speaking",2,0
+41.84,USER_MESSAGE,"hey Alex what year are you in which year are you studying in at Burke",2,0
+42.15,FEEDBACK_VISUAL_ICON,"Loading icon shown",2,0
+43.32,AI_RESPONSE_FULL,"Received full JSON response",3,0
+43.32,FEEDBACK_STOPPED,"Duration: 1.17s",3,0
+43.97,AVATAR_TALKING,"Avatar started speaking",3,0
+43.97,AVATAR_TALKING,"Avatar started speaking",3,0
+43.97,AVATAR_TALKING,"Avatar started speaking",3,0
+52.17,AVATAR_IDLE,"Avatar finished speaking",3,0
+52.17,AVATAR_IDLE,"Avatar finished speaking",3,0
+52.17,AVATAR_IDLE,"Avatar finished speaking",3,0
+63.74,USER_MESSAGE,"find out uh what's your favorite sport Alex what do you like to play",3,0
+64.04,FEEDBACK_VISUAL_ICON,"Loading icon shown",3,0
+65.73,AI_RESPONSE_FULL,"Received full JSON response",4,0
+65.73,FEEDBACK_STOPPED,"Duration: 1.68s",4,0
+66.92,AVATAR_TALKING,"Avatar started speaking",4,0
+66.92,AVATAR_TALKING,"Avatar started speaking",4,0
+66.92,AVATAR_TALKING,"Avatar started speaking",4,0
+66.92,AVATAR_TALKING,"Avatar started speaking",4,0
+76.54,AVATAR_IDLE,"Avatar finished speaking",4,0
+76.54,AVATAR_IDLE,"Avatar finished speaking",4,0
+76.54,AVATAR_IDLE,"Avatar finished speaking",4,0
+76.54,AVATAR_IDLE,"Avatar finished speaking",4,0
+79.95,USER_MESSAGE,"hobby Alex",4,0
+80.26,FEEDBACK_VISUAL_ICON,"Loading icon shown",4,0
+81.42,AI_RESPONSE_FULL,"Received full JSON response",5,0
+81.42,FEEDBACK_STOPPED,"Duration: 1.17s",5,0
+81.42,ALL_TASKS_COMPLETED,"All 4 tasks completed",5,0
+82.23,AVATAR_TALKING,"Avatar started speaking",5,0
+82.23,AVATAR_TALKING,"Avatar started speaking",5,0
+82.23,AVATAR_TALKING,"Avatar started speaking",5,0
+82.23,AVATAR_TALKING,"Avatar started speaking",5,0
+82.23,AVATAR_TALKING,"Avatar started speaking",5,0
+93.95,AVATAR_IDLE,"Avatar finished speaking",5,0
+93.95,AVATAR_IDLE,"Avatar finished speaking",5,0
+93.95,AVATAR_IDLE,"Avatar finished speaking",5,0
+93.95,AVATAR_IDLE,"Avatar finished speaking",5,0
+93.95,AVATAR_IDLE,"Avatar finished speaking",5,0
+0.00,CONVERSATION_END,"Reason: Objectives Met / AI Requested End | Duration: 1.58m",5,0
+
+=== SUMMARY ===
+Duration (minutes),0.00
+Total Exchanges,5
+Info Discovered,0/4
+Feedback Enabled,True
+Feedback Types,VisualCueIcon
+Feedback Delay,0.3s
