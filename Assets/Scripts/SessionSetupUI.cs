@@ -1,78 +1,51 @@
 using UnityEngine;
-using TMPro;
-using UnityEngine.UI;
 
 /// <summary>
-/// UI Manager for setting participant ID and session number before starting experiment
+/// Simple session setup - set participant ID and session number directly in Inspector
 /// </summary>
 public class SessionSetupUI : MonoBehaviour
 {
-    [Header("UI References")]
-    [SerializeField] private TMP_InputField participantIdInput;
-    [SerializeField] private TMP_Dropdown sessionNumberDropdown;
-    [SerializeField] private Button startButton;
-    [SerializeField] private TextMeshProUGUI statusText;
-    [SerializeField] private GameObject setupPanel;
+    [Header("Session Configuration")]
+    [Tooltip("Enter participant ID (e.g., P01, P02, ... P20)")]
+    [SerializeField] private string participantId = "P01";
+    
+    [Tooltip("Select session number (1-4)")]
+    [SerializeField] [Range(1, 4)] private int sessionNumber = 1;
     
     [Header("Scene Management")]
     [SerializeField] private UnityAndGeminiV3 geminiManager;
 
     private void Start()
     {
-        if (startButton != null)
-        {
-            startButton.onClick.AddListener(OnStartButtonClicked);
-        }
-
-        // Setup dropdown with session numbers 1-4
-        if (sessionNumberDropdown != null)
-        {
-            sessionNumberDropdown.ClearOptions();
-            sessionNumberDropdown.AddOptions(new System.Collections.Generic.List<string> 
-            { 
-                "Session 1", 
-                "Session 2", 
-                "Session 3", 
-                "Session 4" 
-            });
-        }
-
-        UpdateStatusText("");
+        StartSession();
     }
 
-    private void OnStartButtonClicked()
+    private void StartSession()
     {
-        string participantId = participantIdInput?.text.Trim().ToUpper();
-        int sessionNumber = sessionNumberDropdown != null ? sessionNumberDropdown.value + 1 : 1;
-
-        // Validate input
-        if (string.IsNullOrEmpty(participantId))
+        // Validate and format participant ID
+        string pid = participantId.Trim().ToUpper();
+        
+        if (string.IsNullOrEmpty(pid))
         {
-            UpdateStatusText("Please enter a Participant ID");
+            Debug.LogError("[SessionSetup] Participant ID is empty! Please set it in Inspector.");
             return;
         }
 
         // Set the session configuration
-        SessionConfiguration.Instance.SetSession(participantId, sessionNumber);
+        SessionConfiguration.Instance.SetSession(pid, sessionNumber);
 
         // Get feedback type
         string feedbackType = SessionConfiguration.Instance.GetCurrentFeedbackType();
         
         // Check if there's a saved config
         bool hasSavedConfig = SessionConfiguration.Instance.HasSavedConfig();
-        string configStatus = hasSavedConfig ? " (Reusing saved questions)" : " (New questions)";
+        string configStatus = hasSavedConfig ? "(Reusing saved questions)" : "(New questions)";
 
         // Get session progress
-        string progress = SessionConfiguration.Instance.GetSessionProgressSummary(participantId);
+        string progress = SessionConfiguration.Instance.GetSessionProgressSummary(pid);
+        
+        Debug.Log($"[SessionSetup] Starting {pid} - Session {sessionNumber} - {feedbackType} {configStatus}");
         Debug.Log($"[SessionSetup] {progress}");
-
-        UpdateStatusText($"Starting {participantId} - S{sessionNumber} - {feedbackType}{configStatus}");
-
-        // Hide setup panel
-        if (setupPanel != null)
-        {
-            setupPanel.SetActive(false);
-        }
 
         // Start the conversation
         if (geminiManager != null)
@@ -81,33 +54,16 @@ public class SessionSetupUI : MonoBehaviour
         }
         else
         {
-            Debug.LogError("[SessionSetupUI] GeminiManager reference not set!");
-        }
-    }
-
-    private void UpdateStatusText(string message)
-    {
-        if (statusText != null)
-        {
-            statusText.text = message;
-            statusText.color = string.IsNullOrEmpty(message) ? Color.white : Color.yellow;
+            Debug.LogError("[SessionSetupUI] GeminiManager reference not set in Inspector!");
         }
     }
 
     /// <summary>
-    /// For testing in editor
+    /// Restart with current settings
     /// </summary>
-    [ContextMenu("Quick Start - P01 S1")]
-    public void QuickStartP01S1()
+    [ContextMenu("Restart Session")]
+    public void RestartSession()
     {
-        SessionConfiguration.Instance.SetSession("P01", 1);
-        if (geminiManager != null) geminiManager.StartIntro();
-    }
-
-    [ContextMenu("Quick Start - P01 S3")]
-    public void QuickStartP01S3()
-    {
-        SessionConfiguration.Instance.SetSession("P01", 3);
-        if (geminiManager != null) geminiManager.StartIntro();
+        StartSession();
     }
 }

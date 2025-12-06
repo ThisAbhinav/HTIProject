@@ -495,13 +495,18 @@ public class ConversationManager : MonoBehaviour
             Directory.CreateDirectory(logDirectory);
         }
 
+        // Use participant ID and session number in filename
+        string participantId = SessionConfiguration.Instance.currentParticipantId;
+        string sessionNum = SessionConfiguration.Instance.currentSessionNumber.ToString();
+        string feedbackType = SessionConfiguration.Instance.GetCurrentFeedbackType();
         string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-        string baseFilename = $"HTI_Conversation_{timestamp}";
+        
+        string baseFilename = $"{participantId}_S{sessionNum}_{feedbackType}_{timestamp}";
 
         SaveEventLog(Path.Combine(logDirectory, baseFilename + "_Events.csv"));
         SaveConversationHistory(Path.Combine(logDirectory, baseFilename + "_Conversation.csv"));
 
-        Debug.Log($"[Conversation] ✓ Logs saved to {logDirectory}");
+        Debug.Log($"[Conversation] ✓ Logs saved: {baseFilename}");
     }
 
     private void SaveEventLog(string filepath)
