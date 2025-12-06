@@ -1,0 +1,72 @@
+Timestamp(s),Event Type,Details,Exchange Count,Info Discovered
+0.00,CONVERSATION_START,"Feedback: Gesture",0,0
+0.30,FEEDBACK_GESTURE,"Thinking animation triggered",0,0
+2.90,AI_RESPONSE_FULL,"Received full JSON response",1,0
+2.90,FEEDBACK_STOPPED,"Duration: 2.60s",1,0
+2.90,AVATAR_TALKING,"Avatar started speaking",1,0
+3.84,AVATAR_TALKING,"Avatar started speaking",1,0
+13.72,AVATAR_IDLE,"Avatar finished speaking",1,0
+20.83,USER_MESSAGE,"things have been great",1,0
+23.16,AI_RESPONSE_FULL,"Received full JSON response",2,0
+23.16,FEEDBACK_STOPPED,"Duration: 22.86s",2,0
+23.75,AVATAR_TALKING,"Avatar started speaking",2,0
+23.75,AVATAR_TALKING,"Avatar started speaking",2,0
+32.17,AVATAR_IDLE,"Avatar finished speaking",2,0
+32.17,AVATAR_IDLE,"Avatar finished speaking",2,0
+64.57,USER_MESSAGE,"also study computer science and artificial intelligence at fluxa and um we have a very good campus landmark of a bridge",2,0
+66.49,AI_RESPONSE_FULL,"Received full JSON response",3,0
+66.49,FEEDBACK_STOPPED,"Duration: 66.19s",3,0
+67.40,AVATAR_TALKING,"Avatar started speaking",3,0
+67.40,AVATAR_TALKING,"Avatar started speaking",3,0
+67.40,AVATAR_TALKING,"Avatar started speaking",3,0
+82.33,AVATAR_IDLE,"Avatar finished speaking",3,0
+82.33,AVATAR_IDLE,"Avatar finished speaking",3,0
+82.33,AVATAR_IDLE,"Avatar finished speaking",3,0
+96.60,USER_MESSAGE,"only uh and also I live in the Hostel 2 dog or what about you which dog do you live in",3,0
+98.01,AI_RESPONSE_FULL,"Received full JSON response",4,0
+98.01,FEEDBACK_STOPPED,"Duration: 97.71s",4,0
+98.94,AVATAR_TALKING,"Avatar started speaking",4,0
+98.94,AVATAR_TALKING,"Avatar started speaking",4,0
+98.94,AVATAR_TALKING,"Avatar started speaking",4,0
+98.94,AVATAR_TALKING,"Avatar started speaking",4,0
+109.09,AVATAR_IDLE,"Avatar finished speaking",4,0
+109.09,AVATAR_IDLE,"Avatar finished speaking",4,0
+109.09,AVATAR_IDLE,"Avatar finished speaking",4,0
+109.09,AVATAR_IDLE,"Avatar finished speaking",4,0
+126.32,USER_MESSAGE,"uh Hostel 2 has Pam my friend who is a very fun dude",4,0
+127.97,AI_RESPONSE_FULL,"Received full JSON response",5,0
+127.97,FEEDBACK_STOPPED,"Duration: 127.67s",5,0
+129.07,AVATAR_TALKING,"Avatar started speaking",5,0
+129.07,AVATAR_TALKING,"Avatar started speaking",5,0
+129.07,AVATAR_TALKING,"Avatar started speaking",5,0
+129.07,AVATAR_TALKING,"Avatar started speaking",5,0
+129.07,AVATAR_TALKING,"Avatar started speaking",5,0
+143.84,AVATAR_IDLE,"Avatar finished speaking",5,0
+143.84,AVATAR_IDLE,"Avatar finished speaking",5,0
+143.84,AVATAR_IDLE,"Avatar finished speaking",5,0
+143.84,AVATAR_IDLE,"Avatar finished speaking",5,0
+143.84,AVATAR_IDLE,"Avatar finished speaking",5,0
+157.85,USER_MESSAGE,"fluctuation library and uh it is pretty cool so yeah I go there to stay",5,0
+159.53,AI_RESPONSE_FULL,"Received full JSON response",6,0
+159.53,FEEDBACK_STOPPED,"Duration: 159.22s",6,0
+160.49,AVATAR_TALKING,"Avatar started speaking",6,0
+160.49,AVATAR_TALKING,"Avatar started speaking",6,0
+160.49,AVATAR_TALKING,"Avatar started speaking",6,0
+160.49,AVATAR_TALKING,"Avatar started speaking",6,0
+160.49,AVATAR_TALKING,"Avatar started speaking",6,0
+160.49,AVATAR_TALKING,"Avatar started speaking",6,0
+173.35,AVATAR_IDLE,"Avatar finished speaking",6,0
+173.35,AVATAR_IDLE,"Avatar finished speaking",6,0
+173.35,AVATAR_IDLE,"Avatar finished speaking",6,0
+173.35,AVATAR_IDLE,"Avatar finished speaking",6,0
+173.35,AVATAR_IDLE,"Avatar finished speaking",6,0
+173.35,AVATAR_IDLE,"Avatar finished speaking",6,0
+0.00,CONVERSATION_END,"Reason: Objectives Met / AI Requested End | Duration: 2.91m",6,0
+
+=== SUMMARY ===
+Duration (minutes),0.00
+Total Exchanges,6
+Info Discovered,0/4
+Feedback Enabled,True
+Feedback Types,Gesture
+Feedback Delay,0.3s

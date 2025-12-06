@@ -133,8 +133,9 @@ Set ""end_conversation"" to true ONLY if the user says ""Goodbye"".
     {
         conversationManager.StartConversation();
         string triggerMsg = "The user has just approached you. Say 'Hey there, long time no see', and introduce yourself briefly.";
-        StartCoroutine(SendChatRequestToGemini(triggerMsg, true));
+        StartCoroutine(SendChatRequestToGemini(triggerMsg, true, true));
     }
+
     private void HandleUserMessage(string message)
     {
         SendChat(message);
@@ -145,15 +146,12 @@ Set ""end_conversation"" to true ONLY if the user says ""Goodbye"".
         if (isProcessing) return;
         if (string.IsNullOrWhiteSpace(userMessage)) return;
 
-        StartCoroutine(SendChatRequestToGemini(userMessage,false));
+        StartCoroutine(SendChatRequestToGemini(userMessage, false, false));
     }
 
-    private IEnumerator SendChatRequestToGemini(string newMessage, bool isHiddenSystemTrigger)
+    private IEnumerator SendChatRequestToGemini(string newMessage, bool isHiddenSystemTrigger, bool isIntroMessage = false)
     {
         isProcessing = true;
-
-        if (!isHiddenSystemTrigger && conversationManager != null)
-            conversationManager.TriggerFeedback(newMessage);
 
         if (addNaturalThinkingDelay)
             yield return new WaitForSeconds(UnityEngine.Random.Range(minThinkingDelay, maxThinkingDelay));
@@ -189,14 +187,14 @@ Set ""end_conversation"" to true ONLY if the user says ""Goodbye"".
             }
             else
             {
-                HandleGeminiResponse(www.downloadHandler.text);
+                HandleGeminiResponse(www.downloadHandler.text, isIntroMessage);
             }
         }
 
         isProcessing = false;
     }
 
-    private void HandleGeminiResponse(string jsonResponse)
+    private void HandleGeminiResponse(string jsonResponse, bool isIntroMessage = false)
     {
         try
         {
@@ -219,14 +217,18 @@ Set ""end_conversation"" to true ONLY if the user says ""Goodbye"".
                 string speechText = CleanTextForSpeech(aiData.message);
                 taskManager.CutTasks(speechText);
 
-                bool allTasksDone = taskManager.AllTasksCompleted();
+                // Check if this is a goodbye response (tasks were completed and avatar said goodbye)
+                bool isGoodbyeResponse = taskManager.HasTriggeredGoodbye();
 
-                if (aiData.end_conversation || allTasksDone)
+                // Only queue conversation end if:
+                // 1. AI explicitly requested end, OR
+                // 2. This is the goodbye response after all tasks completed
+                if (aiData.end_conversation || isGoodbyeResponse)
                 {
                     conversationManager.QueueConversationEnd();
                 }
 
-                StartCoroutine(StreamTextWhileSpeaking(aiData.message, speechText));
+                StartCoroutine(StreamTextWhileSpeaking(aiData.message, speechText, isIntroMessage));
             }
         }
         catch (Exception ex)
@@ -242,8 +244,14 @@ Set ""end_conversation"" to true ONLY if the user says ""Goodbye"".
         return Regex.Replace(text, @"[*_`]", "").Trim();
     }
 
-    private IEnumerator StreamTextWhileSpeaking(string fullText, string speechText)
+    private IEnumerator StreamTextWhileSpeaking(string fullText, string speechText, bool isIntroMessage = false)
     {
+        // For intro message, trigger talking animation immediately
+        if (isIntroMessage && conversationManager != null)
+        {
+            conversationManager.OnAvatarStartedSpeaking();
+        }
+
         googleServices?.SendTextToGoogle(speechText);
         yield return new WaitForSeconds(0.2f);
 

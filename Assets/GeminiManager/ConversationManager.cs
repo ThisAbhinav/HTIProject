@@ -99,8 +99,8 @@ public class ConversationManager : MonoBehaviour
         {
             TaskManager.OnTaskCompleted += OnInfoDiscovered;
             TaskManager.OnTaskProgressChanged += OnInfoProgressChanged;
-            // Note: We handle ending via the QueueConversationEnd logic now, but keeping this listener is fine
-            TaskManager.OnAllTasksCompleted += OnAllTasksCompleted;
+            // Removed: OnAllTasksCompleted subscription - ending UI is now triggered 
+            // only after avatar finishes speaking goodbye
         }
 
         if (visualCuePrefab != null) visualCuePrefab.SetActive(false);
@@ -117,7 +117,6 @@ public class ConversationManager : MonoBehaviour
         ChatManager.OnMessageAdded -= OnMessageReceived;
         TaskManager.OnTaskCompleted -= OnInfoDiscovered;
         TaskManager.OnTaskProgressChanged -= OnInfoProgressChanged;
-        TaskManager.OnAllTasksCompleted -= OnAllTasksCompleted;
     }
 
     private void Update()
@@ -140,25 +139,23 @@ public class ConversationManager : MonoBehaviour
     {
         conversationStartTime = Time.time;
         conversationActive = true;
-        endConversationQueued = false; // Reset queue flag
+        endConversationQueued = false; 
         exchangeCount = 0;
         infoDiscoveredCount = 0;
         lastLogTime = 0f;
         conversationLog.Clear();
-        conversationHistory.Clear(); // Clear history
+        conversationHistory.Clear();
         feedbackTimings.Clear();
 
-        // Reset TaskManager tasks
-        if (taskManager != null)
-        {
-            taskManager.ResetAllTasks();
-        }
+        taskManager.ResetAllTasks();
 
         string feedbackStatus = enableFeedback ? activeFeedbackTypes.ToString() : "None (Control)";
         Debug.Log($"[Conversation] ▶ STARTED | Feedback: {feedbackStatus}");
 
         LogEvent("CONVERSATION_START", $"Feedback: {feedbackStatus}");
-        OnConversationStart?.Invoke();
+        
+        //TriggerFeedback("");
+        //OnConversationStart?.Invoke();
     }
 
     /// <summary>
@@ -460,14 +457,7 @@ public class ConversationManager : MonoBehaviour
         infoDiscoveredCount = completed;
     }
 
-    /// <summary>
-    /// Called when all tasks are completed
-    /// </summary>
-    private void OnAllTasksCompleted()
-    {
-        Debug.Log("[Conversation] All tasks completed via TaskManager event.");
-        LogEvent("ALL_TASKS_COMPLETED", $"All {taskManager.TotalTasksCount} tasks completed");
-    }
+    // Removed OnAllTasksCompleted handler - ending UI now triggered after goodbye speech
 
     public void EndConversationWithGoodbye()
     {

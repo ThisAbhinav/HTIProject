@@ -45,6 +45,9 @@ public class TaskManager : MonoBehaviour
     
     public int CompletedTasksCount { get; private set; }
     public int TotalTasksCount => activeTasks.Count;
+    
+    private bool hasTriggeredGoodbye = false;
+    private bool isWaitingForGoodbye = false;
 
     void Start()
     {
@@ -132,7 +135,8 @@ public class TaskManager : MonoBehaviour
 
         if (AllTasksCompleted())
         {
-            OnAllTasksCompleted?.Invoke();
+            isWaitingForGoodbye = true;
+            Debug.Log("All tasks completed - waiting for goodbye");
         }
     }
 
@@ -144,9 +148,46 @@ public class TaskManager : MonoBehaviour
         {
             if (!t.isCompleted) status += t.title + ", ";
         }
-        if (AllTasksCompleted()) status = "ALL TASKS COMPLETED. You can say goodbye now.";
+        if (AllTasksCompleted() && !hasTriggeredGoodbye) 
+        {
+            hasTriggeredGoodbye = true;
+            status = "ALL TASKS COMPLETED. You can say goodbye now.";
+        }
+        else if (AllTasksCompleted() && hasTriggeredGoodbye)
+        {
+            status = "GOODBYE_SENT";
+        }
         return status;
     }
+    
+    /// <summary>
+    /// Call this after avatar finishes saying goodbye to show ending UI
+    /// </summary>
+    public void TriggerEndingUI()
+    {
+        if (AllTasksCompleted())
+        {
+            Debug.Log("Triggering ending UI after goodbye");
+            OnAllTasksCompleted?.Invoke();
+        }
+    }
+    
+    /// <summary>
+    /// Check if we're in the goodbye phase
+    /// </summary>
+    public bool IsWaitingForGoodbye()
+    {
+        return isWaitingForGoodbye;
+    }
+    
+    /// <summary>
+    /// Check if goodbye has been triggered
+    /// </summary>
+    public bool HasTriggeredGoodbye()
+    {
+        return hasTriggeredGoodbye;
+    }
+
     private void UpdateTaskVisual(UserTask task)
     {
         if (taskTextMap.TryGetValue(task, out TextMeshProUGUI text))
@@ -171,6 +212,8 @@ public class TaskManager : MonoBehaviour
     {
         // For debugging, we just reset the current active ones
         CompletedTasksCount = 0;
+        hasTriggeredGoodbye = false;
+        isWaitingForGoodbye = false;
         foreach (UserTask task in activeTasks)
         {
             task.isCompleted = false;

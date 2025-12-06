@@ -14,6 +14,7 @@ namespace GoogleSpeechToText.Scripts
         [Header("Manager References")]
         [SerializeField] private UnityAndGeminiV3 geminiManager;
         [SerializeField] private ChatManager chatManager;
+        [SerializeField] private ConversationManager conversationManager;
 
         private bool useVRControllers = true;
         private XRNode controllerHand = XRNode.RightHand;
@@ -201,6 +202,12 @@ namespace GoogleSpeechToText.Scripts
                 return;
             }
 
+            // Trigger feedback IMMEDIATELY when recording stops (before STT processing)
+            if (conversationManager != null)
+            {
+                conversationManager.TriggerFeedback("");
+            }
+
             var samples = new float[position * clip.channels];
             clip.GetData(samples, 0);
             bytes = EncodeAsWAV(samples, clip.frequency, clip.channels);
@@ -221,6 +228,11 @@ namespace GoogleSpeechToText.Scripts
                 },
                 (error) => {
                     Debug.LogError("STT Error: " + error.error.message);
+                    // Stop feedback if STT fails
+                    if (conversationManager != null)
+                    {
+                        conversationManager.StopFeedback();
+                    }
                 });
         }
 

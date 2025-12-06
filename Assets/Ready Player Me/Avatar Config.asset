@@ -63,3 +63,6 @@ MonoBehaviour:
   MorphTargets:
   - eyeBlinkLeft
   - eyeBlinkRight
+  - Oculus Visemes
+  - mouthOpen
+  - mouthClose
