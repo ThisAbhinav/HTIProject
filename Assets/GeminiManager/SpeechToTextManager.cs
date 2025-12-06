@@ -174,7 +174,7 @@ namespace GoogleSpeechToText.Scripts
                 return;
             }
 
-            clip = Microphone.Start(null, false, 10, 44100);
+            clip = Microphone.Start(null, false, 20, 44100);
             recording = true;
 
             if (recordingUI != null) recordingUI.SetActive(true);

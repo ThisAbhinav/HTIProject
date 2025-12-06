@@ -12,7 +12,7 @@ using System.Linq;
 public class TaskManager : MonoBehaviour
 {
     [SerializeField] private GameObject TasksBox;
-
+    [SerializeField] private TMP_FontAsset interFont;
     private List<UserTask> activeTasks = new List<UserTask>();
     private Dictionary<UserTask, TextMeshProUGUI> taskTextMap = new Dictionary<UserTask, TextMeshProUGUI>();
     private List<UserTask> masterTaskPool = new()
@@ -84,6 +84,7 @@ public class TaskManager : MonoBehaviour
             taskTextObj.transform.SetParent(TasksBox.transform, false);
 
             TextMeshProUGUI textComponent = taskTextObj.AddComponent<TextMeshProUGUI>();
+            textComponent.font = interFont;
             textComponent.text = "☐ " + task.title;
             textComponent.fontSize = 12;
             textComponent.color = Color.white;

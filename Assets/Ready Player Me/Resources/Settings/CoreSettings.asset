@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: CoreSettings
   m_EditorClassIdentifier: ReadyPlayerMe.Core::ReadyPlayerMe.Core.Data.CoreSettings
   Subdomain: hti
-  AppId: 
+  AppId: 68c17d16d5a3818bc37ec53f
   EnableLogging: 0
-  EnableAnalytics: 1
+  EnableAnalytics: 0
   BodyType: 1
