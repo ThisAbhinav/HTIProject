@@ -58,14 +58,83 @@ public class TaskManager : MonoBehaviour
 
     private void SelectRandomTasks()
     {
-        // Shuffle the master pool
-        System.Random updateRandom = new System.Random();
-        List<UserTask> shuffledTasks = masterTaskPool.OrderBy(x => updateRandom.Next()).ToList();
+        // Check if there's a saved configuration for this session
+        List<int> savedIndices = SessionConfiguration.Instance.LoadSessionConfig();
+        
+        if (savedIndices != null && savedIndices.Count > 0)
+        {
+            // Load tasks from saved configuration
+            activeTasks.Clear();
+            foreach (int index in savedIndices)
+            {
+                if (index >= 0 && index < masterTaskPool.Count)
+                {
+                    activeTasks.Add(masterTaskPool[index]);
+                }
+            }
+            Debug.Log($"[TaskManager] Loaded saved questions for session: [{string.Join(", ", savedIndices)}]");
+        }
+        else
+        {
+            // Generate new random selection, excluding questions from previous sessions
+            string participantId = SessionConfiguration.Instance.currentParticipantId;
+            
+            if (!string.IsNullOrEmpty(participantId))
+            {
+                // Get questions not used in previous sessions
+                List<int> availableIndices = SessionConfiguration.Instance.GetAvailableQuestionIndices(
+                    participantId, 
+                    masterTaskPool.Count
+                );
+                
+                List<int> usedIndices = SessionConfiguration.Instance.GetUsedQuestionIndices(participantId);
+                
+                Debug.Log($"[TaskManager] Available questions for {participantId}: {availableIndices.Count}/{masterTaskPool.Count}");
+                Debug.Log($"[TaskManager] Previously used questions: [{string.Join(", ", usedIndices)}]");
+                
+                if (availableIndices.Count < 4)
+                {
+                    Debug.LogWarning($"[TaskManager] Only {availableIndices.Count} questions available! Participant has completed most sessions.");
+                }
+                
+                // Shuffle available questions and select 4 (or fewer if not enough available)
+                System.Random updateRandom = new System.Random();
+                List<int> shuffledAvailable = availableIndices.OrderBy(x => updateRandom.Next()).ToList();
+                List<int> selectedIndices = shuffledAvailable.Take(4).ToList();
+                
+                // Convert indices to tasks
+                activeTasks.Clear();
+                foreach (int index in selectedIndices)
+                {
+                    activeTasks.Add(masterTaskPool[index]);
+                }
+                
+                // Save this configuration
+                SessionConfiguration.Instance.SaveSessionConfig(selectedIndices);
+                
+                Debug.Log($"[TaskManager] New random questions selected (excluding used): [{string.Join(", ", selectedIndices)}]");
+            }
+            else
+            {
+                // Fallback: No participant ID set, use old random method
+                Debug.LogWarning("[TaskManager] No participant ID set. Using fallback random selection.");
+                System.Random updateRandom = new System.Random();
+                List<UserTask> shuffledTasks = masterTaskPool.OrderBy(x => updateRandom.Next()).ToList();
+                activeTasks = shuffledTasks.Take(4).ToList();
+                
+                List<int> selectedIndices = new List<int>();
+                foreach (var task in activeTasks)
+                {
+                    int index = masterTaskPool.IndexOf(task);
+                    selectedIndices.Add(index);
+                }
+                SessionConfiguration.Instance.SaveSessionConfig(selectedIndices);
+                
+                Debug.Log($"[TaskManager] Random questions selected (no participant tracking): [{string.Join(", ", selectedIndices)}]");
+            }
+        }
 
-        // Take the first 4
-        activeTasks = shuffledTasks.Take(4).ToList();
-
-        Debug.Log($"Tasks selected for this session: {string.Join(", ", activeTasks.Select(t => t.title))}");
+        Debug.Log($"Tasks for this session: {string.Join(", ", activeTasks.Select(t => t.title))}");
     }
 
 
