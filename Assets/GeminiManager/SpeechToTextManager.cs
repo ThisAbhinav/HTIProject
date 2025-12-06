@@ -149,14 +149,12 @@ namespace GoogleSpeechToText.Scripts
             }
             else
             {
-                // Debugging: Print all devices Unity sees to help you troubleshoot
                 List<InputDevice> allDevices = new List<InputDevice>();
                 InputDevices.GetDevices(allDevices);
-                Debug.LogWarning($"Controller not found on {controllerHand}. Total Devices connected: {allDevices.Count}");
-                foreach (var d in allDevices)
-                {
-                    Debug.Log($"Found Device: {d.name} | Role: {d.role}");
-                }
+                //foreach (var d in allDevices)
+                //{
+                //    Debug.Log($"Found Device: {d.name} | Role: {d.role}");
+                //}
             }
         }
 

@@ -60,7 +60,6 @@ public class UnityAndGeminiV3 : MonoBehaviour
 
     private List<Content> chatHistory = new List<Content>();
     private bool isProcessing = false;
-    private bool systemPromptInitialized = false;
 
     [Header("Timing")]
     [SerializeField] private bool addNaturalThinkingDelay = true;
@@ -128,7 +127,6 @@ Set ""end_conversation"" to true ONLY if the user says ""Goodbye"".
             parts = new List<Part> { new Part { text = baseSystemPrompt } }
         };
         chatHistory.Add(systemContent);
-        systemPromptInitialized = true;
     }
 
     public void StartIntro()
