@@ -2,7 +2,9 @@ using UnityEngine;
 
 /// <summary>
 /// Simple session setup - set participant ID and session number directly in Inspector
+/// IMPORTANT: This script sets the session configuration that TaskManager depends on.
 /// </summary>
+[DefaultExecutionOrder(-50)] // Run after SessionConfiguration (-100) but before TaskManager (0)
 public class SessionSetupUI : MonoBehaviour
 {
     [Header("Session Configuration")]
@@ -12,15 +14,13 @@ public class SessionSetupUI : MonoBehaviour
     [Tooltip("Select session number (1-4)")]
     [SerializeField] [Range(1, 4)] private int sessionNumber = 1;
     
-    [Header("Scene Management")]
-    [SerializeField] private UnityAndGeminiV3 geminiManager;
-
-    private void Start()
+    private void Awake()
     {
-        StartSession();
+        // Configure session in Awake to ensure it runs before TaskManager.Start()
+        ConfigureSession();
     }
 
-    private void StartSession()
+    private void ConfigureSession()
     {
         // Validate and format participant ID
         string pid = participantId.Trim().ToUpper();
@@ -44,18 +44,8 @@ public class SessionSetupUI : MonoBehaviour
         // Get session progress
         string progress = SessionConfiguration.Instance.GetSessionProgressSummary(pid);
         
-        Debug.Log($"[SessionSetup] Starting {pid} - Session {sessionNumber} - {feedbackType} {configStatus}");
+        Debug.Log($"[SessionSetup] Configured {pid} - Session {sessionNumber} - {feedbackType} {configStatus}");
         Debug.Log($"[SessionSetup] {progress}");
-
-        // Start the conversation
-        if (geminiManager != null)
-        {
-            geminiManager.StartIntro();
-        }
-        else
-        {
-            Debug.LogError("[SessionSetupUI] GeminiManager reference not set in Inspector!");
-        }
     }
 
     /// <summary>
@@ -64,6 +54,6 @@ public class SessionSetupUI : MonoBehaviour
     [ContextMenu("Restart Session")]
     public void RestartSession()
     {
-        StartSession();
+        ConfigureSession();
     }
 }

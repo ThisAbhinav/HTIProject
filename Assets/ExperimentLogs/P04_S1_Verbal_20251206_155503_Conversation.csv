@@ -1,0 +1,10 @@
+Exchange #,Timestamp(s),User Message,AI Response,Response Time(s),Feedback Types Used,Feedback Delay(s),Feedback Start(s),Feedback Duration(s),Feedback Cancelled
+2,64.18,"Alex what is your music taste can you tell me about it also do you have any siblings","For studying, I'm all about lo-fi beats and some chill jazz – super relaxing. And yep, I have one younger sister named Maya. Do you have any siblings, by the way?",2.08,"None",0.30,N/A,N/A,False
+3,125.82,"good to know I also have a sister her name is Anushka can you tell me what games do you play Alex in your free time","Oh, that's cool! Right now, I'm pretty deep into Elden Ring. It's super challenging but a lot of fun. What kind of games do you usually play?",1.53,"None",0.30,N/A,N/A,False
+4,155.90,"I play games like Tetris I really like Tetris","Tetris is a classic! Can't beat a good puzzle game. So, what are you studying here at Plaksha?",1.50,"None",0.30,N/A,N/A,False
+5,171.69,"ISD computer science and artificial intelligence Alex what about you","That's awesome, AI is super interesting! I'm also a Computer Science major at Berkeley. What made you choose Plaksha for your studies?",1.38,"None",0.30,N/A,N/A,False
+6,192.45,"black side is a new College that's why I chose it it's very modern","That makes sense, a modern and new college sounds really appealing! It's been really great catching up with you and hearing about everything. I had an awesome time visiting!",5.71,"None",0.30,N/A,N/A,False
+
+=== CONVERSATION SUMMARY ===
+Total Exchanges,5
+Average Response Time,2.44s

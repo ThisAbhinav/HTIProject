@@ -58,7 +58,6 @@ public class TaskManager : MonoBehaviour
 
     private void SelectRandomTasks()
     {
-        // Check if there's a saved configuration for this session
         List<int> savedIndices = SessionConfiguration.Instance.LoadSessionConfig();
         
         if (savedIndices != null && savedIndices.Count > 0)

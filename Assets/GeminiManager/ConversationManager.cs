@@ -51,7 +51,7 @@ public class ConversationManager : MonoBehaviour
     };
 
     [Header("DATA LOGGING")]
-    [SerializeField] private string logDirectory = "Assets/ExperimentLogs";
+    [SerializeField] private string logDirectory; // Will be set in Awake
     [SerializeField] private bool autoSaveOnEnd = true;
 
     // State tracking
@@ -88,6 +88,11 @@ public class ConversationManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        
+        if (string.IsNullOrEmpty(logDirectory))
+        {
+            logDirectory = Path.Combine("", "./Assets/ExperimentLogs");
+        }
     }
 
     private void Start()
@@ -99,8 +104,6 @@ public class ConversationManager : MonoBehaviour
         {
             TaskManager.OnTaskCompleted += OnInfoDiscovered;
             TaskManager.OnTaskProgressChanged += OnInfoProgressChanged;
-            // Removed: OnAllTasksCompleted subscription - ending UI is now triggered 
-            // only after avatar finishes speaking goodbye
         }
 
         if (visualCuePrefab != null) visualCuePrefab.SetActive(false);
@@ -496,7 +499,7 @@ public class ConversationManager : MonoBehaviour
         SaveEventLog(Path.Combine(logDirectory, baseFilename + "_Events.csv"));
         SaveConversationHistory(Path.Combine(logDirectory, baseFilename + "_Conversation.csv"));
 
-        Debug.Log($"[Conversation] ✓ Logs saved: {baseFilename}");
+        Debug.Log($"[Conversation] ✓ Logs saved: {baseFilename}"); 
     }
 
     private void SaveEventLog(string filepath)

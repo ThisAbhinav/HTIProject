@@ -6855,6 +6855,52 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1030972133, guid: abc00000000012668423437282172797, type: 3}
   m_PrefabInstance: {fileID: 487393079}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &498878818
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 498878820}
+  - component: {fileID: 498878821}
+  m_Layer: 0
+  m_Name: SessionConfiguration
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &498878820
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 498878818}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &498878821
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 498878818}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e7566cd8f524d149b269f6838e83f97, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SessionSetupUI
+  participantId: P04
+  sessionNumber: 1
 --- !u!1001 &509013560
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13714,53 +13760,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1077446474}
   m_CullTransparentMesh: 1
---- !u!1 &1078035717
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1078035719}
-  - component: {fileID: 1078035718}
-  m_Layer: 0
-  m_Name: SessionSetupUI
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1078035718
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1078035717}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9e7566cd8f524d149b269f6838e83f97, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SessionSetupUI
-  participantId: P02
-  sessionNumber: 1
-  geminiManager: {fileID: 565529724}
---- !u!4 &1078035719
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1078035717}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.25, y: -5.47772, z: 4.35475}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1079110760
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13869,6 +13868,10 @@ PrefabInstance:
       propertyPath: useVRControllers
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5451673311877118035, guid: 417c5af75b21ef24ca6f33c7590f00c8, type: 3}
+      propertyPath: conversationManager
+      value: 
+      objectReference: {fileID: 1733919904}
     - target: {fileID: 5451673311877118035, guid: 417c5af75b21ef24ca6f33c7590f00c8, type: 3}
       propertyPath: startInstructionsUI
       value: 
@@ -32629,7 +32632,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2125185196}
   m_Layer: 0
-  m_Name: ChatPerson (1)
+  m_Name: ChatPerson
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -33056,8 +33059,7 @@ MonoBehaviour:
   avatarAnimator: {fileID: 7201220261026691480}
   talkingParameterName: IsTalking
   thinkingParameterName: IsThinking
-  thinkingVariantParameterName: ThinkingVariant
-  thinkingAnimationCount: 2
+  thinkingClips: []
 --- !u!82 &7201220261026691476
 AudioSource:
   m_ObjectHideFlags: 0
@@ -33287,4 +33289,4 @@ SceneRoots:
   - {fileID: 2022771374}
   - {fileID: 1733919905}
   - {fileID: 388610425}
-  - {fileID: 1078035719}
+  - {fileID: 498878820}

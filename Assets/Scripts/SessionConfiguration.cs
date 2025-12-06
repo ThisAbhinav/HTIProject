@@ -18,19 +18,40 @@ public class SessionConfig
     public string timestamp;
 }
 
+/// <summary>
+/// Singleton that manages session configuration.
+/// Auto-creates itself if not present in scene.
+/// </summary>
+[DefaultExecutionOrder(-100)] // Ensure this runs before other scripts
 public class SessionConfiguration : MonoBehaviour
 {
     private static SessionConfiguration instance;
+    private static bool isInitialized = false;
+    
     public static SessionConfiguration Instance
     {
         get
         {
             if (instance == null)
             {
-                GameObject go = new GameObject("SessionConfiguration");
-                instance = go.AddComponent<SessionConfiguration>();
-                DontDestroyOnLoad(go);
+                // Try to find existing instance in scene
+                instance = FindObjectOfType<SessionConfiguration>();
+                
+                if (instance == null)
+                {
+                    // Auto-create if not found
+                    GameObject go = new GameObject("SessionConfiguration");
+                    instance = go.AddComponent<SessionConfiguration>();
+                    Debug.Log("[SessionConfiguration] Auto-created singleton instance");
+                }
             }
+            
+            // Ensure initialization happens even if accessed before Awake
+            if (!isInitialized && instance != null)
+            {
+                instance.Initialize();
+            }
+            
             return instance;
         }
     }
@@ -39,7 +60,7 @@ public class SessionConfiguration : MonoBehaviour
     public string currentParticipantId = "";
     public int currentSessionNumber = 0;
 
-    private string configDirectory = "Assets/ExperimentLogs/SessionConfigs";
+    private string configDirectory;
     private Dictionary<string, SessionConfig> loadedConfigs = new Dictionary<string, SessionConfig>();
     
     // Counterbalanced session orders for all 20 participants
@@ -82,10 +103,21 @@ public class SessionConfiguration : MonoBehaviour
             Destroy(gameObject);
         }
 
+        Initialize();
+    }
+
+    private void Initialize()
+    {
+        if (isInitialized) return;
+
+        configDirectory = Path.Combine("", "./Assets/ExperimentLogs/SessionConfigs");
+
         if (!Directory.Exists(configDirectory))
         {
             Directory.CreateDirectory(configDirectory);
         }
+
+        isInitialized = true;
     }
 
     /// <summary>
@@ -136,6 +168,9 @@ public class SessionConfiguration : MonoBehaviour
     /// </summary>
     public void SaveSessionConfig(List<int> questionIndices)
     {
+        // Ensure initialized
+        if (!isInitialized) Initialize();
+        
         if (string.IsNullOrEmpty(currentParticipantId) || currentSessionNumber == 0)
         {
             Debug.LogWarning("[SessionConfig] Cannot save: Participant ID or Session Number not set");
@@ -156,8 +191,26 @@ public class SessionConfiguration : MonoBehaviour
 
         try
         {
+            // Ensure directory exists
+            if (!Directory.Exists(configDirectory))
+            {
+                Directory.CreateDirectory(configDirectory);
+                Debug.Log($"[SessionConfig] Created directory: {configDirectory}");
+            }
+            
             string json = JsonUtility.ToJson(config, true);
             File.WriteAllText(filepath, json);
+            
+            // Verify file was written
+            if (File.Exists(filepath))
+            {
+                Debug.Log($"[SessionConfig] Saved to: {filepath}");
+                Debug.Log($"[SessionConfig] Content: {json}");
+            }
+            else
+            {
+                Debug.LogError($"[SessionConfig] File was NOT created at: {filepath}");
+            }
             
             string key = GetConfigKey(currentParticipantId, currentSessionNumber);
             loadedConfigs[key] = config;
@@ -166,7 +219,7 @@ public class SessionConfiguration : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogError($"[SessionConfig] Failed to save: {e.Message}");
+            Debug.LogError($"[SessionConfig] Failed to save to {filepath}: {e.Message}\n{e.StackTrace}");
         }
     }
 
