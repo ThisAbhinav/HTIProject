@@ -31,7 +31,7 @@ public class SessionConfigManager : EditorWindow
         
         // Show feedback type for this combination
         string feedbackType = SessionConfiguration.Instance.GetFeedbackTypeForSession(participantId, sessionNumber);
-        EditorGUILayout.HelpBox($"Feedback Type: {feedbackType}", MessageType.None);
+        EditorGUILayout.HelpBox($"Feedback Type: {feedbackType}", UnityEditor.MessageType.Info);
 
         if (GUILayout.Button("Set Session", GUILayout.Height(30)))
         {
@@ -45,7 +45,7 @@ public class SessionConfigManager : EditorWindow
         bool hasConfig = SessionConfiguration.Instance.HasSavedConfig();
         if (hasConfig)
         {
-            EditorGUILayout.HelpBox($"Saved configuration exists for {participantId} S{sessionNumber}", MessageType.Info);
+            EditorGUILayout.HelpBox($"Saved configuration exists for {participantId} S{sessionNumber}", UnityEditor.MessageType.Info);
             
             if (GUILayout.Button("Delete This Config", GUILayout.Height(25)))
             {
@@ -60,7 +60,7 @@ public class SessionConfigManager : EditorWindow
         }
         else
         {
-            EditorGUILayout.HelpBox($"No saved configuration for {participantId} S{sessionNumber}", MessageType.Warning);
+            EditorGUILayout.HelpBox($"No saved configuration for {participantId} S{sessionNumber}", UnityEditor.MessageType.Warning);
         }
 
         GUILayout.Space(10);
@@ -73,9 +73,9 @@ public class SessionConfigManager : EditorWindow
         List<int> completedSessions = SessionConfiguration.Instance.GetCompletedSessions(participantId);
         
         EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.HelpBox($"Sessions: {completedSessions.Count}/4", MessageType.Info, true);
-        EditorGUILayout.HelpBox($"Questions Used: {usedQuestions.Count}/20", MessageType.Info, true);
-        EditorGUILayout.HelpBox($"Available: {availableQuestions.Count}/20", MessageType.Info, true);
+        EditorGUILayout.HelpBox($"Sessions: {completedSessions.Count}/4", UnityEditor.MessageType.Info, true);
+        EditorGUILayout.HelpBox($"Questions Used: {usedQuestions.Count}/20", UnityEditor.MessageType.Info, true);
+        EditorGUILayout.HelpBox($"Available: {availableQuestions.Count}/20", UnityEditor.MessageType.Info, true);
         EditorGUILayout.EndHorizontal();
         
         // Show which sessions are completed
@@ -104,7 +104,7 @@ public class SessionConfigManager : EditorWindow
         
         if (savedConfigs.Count == 0)
         {
-            EditorGUILayout.HelpBox("No saved configurations found", MessageType.Info);
+            EditorGUILayout.HelpBox("No saved configurations found", UnityEditor.MessageType.Info);
         }
         else
         {
@@ -164,7 +164,7 @@ public class SessionConfigManager : EditorWindow
             "8. Delete configs to generate new random questions\n\n" +
             "Feedback Types: Baseline (1), Gestures (2), Visual (3), Verbal (4)\n" +
             "Each participant has a unique counterbalanced order",
-            MessageType.Info);
+            UnityEditor.MessageType.Info);
     }
 }
 #endif
