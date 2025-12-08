@@ -1,7 +1,0 @@
-Exchange #,Timestamp(s),User Message,AI Response,Response Time(s),Feedback Types Used,Feedback Delay(s),Feedback Start(s),Feedback Duration(s),Feedback Cancelled
-2,45.79,"how are you I love you you are the best person in the world you are sunshine to my life and I think you have 5 siblings and you live in","Haha, you're too kind! It's great to see you too. Actually, I only have one younger sister, Maya. And yeah, I live in Blackwell Hall, the newest dorm on campus. What's dorm life like here at Plaksha?",1.79,"None",0.30,N/A,N/A,False
-3,77.04,"is your favorite sport Alex and what do you drink","My favorite sport is definitely basketball; I'm a huge Warriors fan! And if I'm not having coffee, you'll usually find me with a boba from Plentea. What about you, do you have a favorite sport or go-to drink here?",1.82,"None",0.30,N/A,N/A,False
-
-=== CONVERSATION SUMMARY ===
-Total Exchanges,2
-Average Response Time,1.81s

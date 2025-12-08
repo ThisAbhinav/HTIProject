@@ -1,8 +1,0 @@
-Exchange #,Timestamp(s),User Message,AI Response,Response Time(s),Feedback Types Used,Feedback Delay(s),Feedback Start(s),Feedback Duration(s),Feedback Cancelled
-2,20.11,"what is your favorite sport","Oh, that's an easy one – definitely basketball. I'm a huge Warriors fan, always have been!",3.44,"VerbalFiller",0.30,20.41,N/A,False
-3,36.93,"Alex what is your favorite music","When I'm studying or just chilling, I usually go for lo-fi beats or some jazz. It's perfect for focusing or just relaxing.",1.90,"VerbalFiller",0.30,37.23,N/A,False
-4,64.75,"Alex what is your favorite","Favorite what? There's so much to pick from! If you mean something I love doing, I'd say taking photos, especially of cool architecture around here.",1.80,"VerbalFiller",0.30,65.05,N/A,False
-
-=== CONVERSATION SUMMARY ===
-Total Exchanges,3
-Average Response Time,2.38s

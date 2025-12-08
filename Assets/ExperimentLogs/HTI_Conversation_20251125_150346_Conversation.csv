@@ -1,9 +1,0 @@
-Exchange #,Timestamp(s),User Message,AI Response,Response Time(s),Feedback Types Used,Feedback Delay(s),Feedback Start(s),Feedback Duration(s),Feedback Cancelled
-2,31.81,"doing very well just busy with the conference these days so what are the new clubs that you have joined at Berkeley","Oh, clubs! I'm pretty involved with the Robotics Club, the IEEE one. We're always tinkering with some cool projects, it's a lot of fun. What kind of student organizations are big here at Plaksha?",2.51,"VerbalFiller",0.30,32.11,N/A,False
-3,66.44,"good good uh what's your favorite library to hang out uh and which library has the you know the really good engineering book","For just hanging out or studying, Moffitt Library is my go-to, it's open 24/7 which is super convenient, especially during finals. As for engineering books, Doe Library has an incredible collection, it's really impressive. Do you have a favorite spot on campus for studying or just chilling out?",1.73,"VerbalFiller",0.30,66.75,N/A,False
-4,99.97,"out at many spots but I'm more curious to know which dorm do you live in and which side of Campus is it on","I live in Blackwell Hall, which is one of the newer dorms and pretty awesome. It's on the south side of campus, super close to everything. What's dorm life like here at Plaksha? Do you live on campus?",1.63,"VerbalFiller",0.30,100.28,N/A,False
-5,126.98,"good campus Landmark to know about and you know to meet people especially visitors","Oh, definitely the Campanile, our clock tower! It's super iconic and a really easy spot to tell visitors to meet you, right in the heart of campus. Is there a main landmark or a popular meeting spot here at Plaksha?",1.63,"VerbalFiller",0.30,127.28,N/A,False
-
-=== CONVERSATION SUMMARY ===
-Total Exchanges,4
-Average Response Time,1.87s

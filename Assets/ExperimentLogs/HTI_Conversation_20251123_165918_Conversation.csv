@@ -1,8 +1,0 @@
-Exchange #,Timestamp(s),User Message,AI Response,Response Time(s),Feedback Types Used,Feedback Delay(s),Feedback Start(s),Feedback Duration(s),Feedback Cancelled
-2,19.50,"bro tell me what you're majoring in and where do you live on Camp","Totally! I'm majoring in Computer Science at Berkeley, and I live in Blackwell Hall, the newest dorm on campus. What's Plaksha like, what kind of courses are you taking there?",1.84,"VerbalFiller",0.30,19.80,N/A,False
-3,41.80,"if the leave that but tell me about your hobbies and where do you get the best coffee in Berkeley","Gotcha. My main hobby is photography; I love taking photos around campus. So, what kind of courses are you taking at Plaksha these days, anything interesting?",3.55,"VerbalFiller",0.30,42.10,N/A,False
-4,64.96,"no leave that now tell me where you get the best coffee in book","Haha, alright. For the best coffee in Berkeley, you absolutely have to hit up Caffe Strada. It's a classic. Speaking of classics, have you found any favorite coffee spots here in Mohali yet?",1.17,"VerbalFiller",0.30,65.26,N/A,False
-
-=== CONVERSATION SUMMARY ===
-Total Exchanges,3
-Average Response Time,2.19s

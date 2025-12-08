@@ -246,11 +246,8 @@ Set ""end_conversation"" to true ONLY if the user says ""Goodbye"".
 
     private IEnumerator StreamTextWhileSpeaking(string fullText, string speechText, bool isIntroMessage = false)
     {
-        // For intro message, trigger talking animation immediately
-        if (isIntroMessage && conversationManager != null)
-        {
-            conversationManager.OnAvatarStartedSpeaking();
-        }
+        // Note: OnAvatarStartedSpeaking is called by TextToSpeechManager when audio actually starts playing
+        // This ensures the talking animation syncs with the actual audio playback
 
         googleServices?.SendTextToGoogle(speechText);
         yield return new WaitForSeconds(0.2f);

@@ -113,19 +113,14 @@ namespace GoogleTextToSpeech.Scripts
             voiceHandler.AudioSource.clip = clip;
             voiceHandler.AudioSource.Play();
             
-            // Notify ConversationManager that avatar started speaking
-            if (conversationManager != null)
-            {
-                conversationManager.OnAvatarStartedSpeaking();
-            }
+            conversationManager.OnAvatarStartedSpeaking();
+        
             
             // Wait for audio to finish, then notify avatar stopped speaking
             yield return new WaitWhile(() => voiceHandler.AudioSource.isPlaying);
             
-            if (conversationManager != null)
-            {
-                conversationManager.OnAvatarFinishedSpeaking();
-            }
+            conversationManager.OnAvatarFinishedSpeaking();
+            
         }
     }
 }

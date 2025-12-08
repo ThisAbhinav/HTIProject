@@ -364,8 +364,8 @@ public class ConversationManager : MonoBehaviour
                 currentExchange.feedbackCancelled = true;
             }
 
-            // Return to idle if gesture was going to be triggered
-            if (activeFeedbackTypes.HasFlag(FeedbackType.Gesture) && avatarAnimationController != null)
+            // Return to idle if gesture feedback was going to be triggered
+            if (avatarAnimationController != null)
             {
                 avatarAnimationController.SetIdle();
             }
@@ -396,7 +396,7 @@ public class ConversationManager : MonoBehaviour
         {
             HideVisualCueText();
         }
-        // Gesture (Back to Idle, will transition to Talking when TTS starts)
+        // Gesture (Back to Idle only if gesture feedback was active)
         if (activeFeedbackTypes.HasFlag(FeedbackType.Gesture))
         {
             HideThinkingGesture();
@@ -630,6 +630,7 @@ public class ConversationManager : MonoBehaviour
 
     /// <summary>
     /// Called when avatar starts speaking (from TextToSpeechManager or UnityAndGeminiV3)
+    /// This should ALWAYS trigger talking animation regardless of feedback settings
     /// </summary>
     public void OnAvatarStartedSpeaking()
     {
@@ -642,6 +643,7 @@ public class ConversationManager : MonoBehaviour
 
     /// <summary>
     /// Called when avatar finished speaking (from TextToSpeechManager or UnityAndGeminiV3)
+    /// This should ALWAYS set idle animation regardless of feedback settings
     /// </summary>
     public void OnAvatarFinishedSpeaking()
     {
@@ -649,13 +651,13 @@ public class ConversationManager : MonoBehaviour
         {
             avatarAnimationController.SetIdle();
             LogEvent("AVATAR_IDLE", "Avatar finished speaking");
-
-            // NEW: Check if we need to end the conversation
-            // This ensures we only switch to the Ending UI AFTER the avatar is done talking.
-            if (endConversationQueued && conversationActive)
-            {
-                StartCoroutine(FinalEndSequence());
-            }
+        }
+        
+        // Check if we need to end the conversation
+        // This ensures we only switch to the Ending UI AFTER the avatar is done talking.
+        if (endConversationQueued && conversationActive)
+        {
+            StartCoroutine(FinalEndSequence());
         }
     }
 

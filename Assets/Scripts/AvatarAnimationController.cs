@@ -3,10 +3,15 @@ using UnityEngine;
 /// <summary>
 /// Controls avatar animation states during conversation
 /// Manages transitions between Idle, Talking, and Thinking states
-/// Transitions:
-/// - Idle → Thinking (when IsThinking = true)
-/// - Thinking → Talking (when IsTalking = true)
-/// - Talking → Idle (when IsTalking = false)
+/// 
+/// REQUIRED ANIMATOR TRANSITIONS:
+/// 1. Idle → Talking (Condition: IsTalking = true) - Used when Gesture feedback is disabled
+/// 2. Idle → Thinking (Condition: IsThinking = true) - Used when Gesture feedback is enabled
+/// 3. Thinking → Talking (Condition: IsTalking = true) - When TTS starts after thinking
+/// 4. Talking → Idle (Condition: IsTalking = false) - When TTS finishes
+/// 
+/// Note: Thinking → Idle is NOT needed in normal flow since avatar always
+/// goes Thinking → Talking → Idle. SetIdle() is only called as a safety reset.
 /// </summary>
 public class AvatarAnimationController : MonoBehaviour
 {
@@ -70,14 +75,16 @@ public class AvatarAnimationController : MonoBehaviour
     
     /// <summary>
     /// Set the avatar to Talking state (when speaking)
-    /// Ensures Thinking is false to prevent state loops
+    /// Works from ANY state (Idle or Thinking) - requires proper Animator transitions
     /// </summary>
     public void SetTalking()
     {
         if (avatarAnimator == null) return;
         
-        avatarAnimator.SetBool(thinkingHash, false); // Ensure Thinking is off first
+        // Set Talking true first, then disable Thinking
+        // This order matters for Animator transition priority
         avatarAnimator.SetBool(talkingHash, true);
+        avatarAnimator.SetBool(thinkingHash, false);
         Debug.Log("[Avatar Animation] State: Talking");
     }
     

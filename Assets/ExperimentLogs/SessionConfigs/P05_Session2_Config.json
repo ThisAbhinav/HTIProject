@@ -1,0 +1,12 @@
+{
+    "participantId": "P05",
+    "sessionNumber": 2,
+    "questionIndices": [
+        2,
+        8,
+        17,
+        19
+    ],
+    "feedbackType": "Gestures",
+    "timestamp": "2025-12-07 12:10:04"
+}

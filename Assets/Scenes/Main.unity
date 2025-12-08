@@ -6899,8 +6899,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e7566cd8f524d149b269f6838e83f97, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SessionSetupUI
-  participantId: P04
-  sessionNumber: 1
+  participantId: P10
+  sessionNumber: 4
 --- !u!1001 &509013560
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13850,7 +13850,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5451673311877118035, guid: 417c5af75b21ef24ca6f33c7590f00c8, type: 3}
       propertyPath: apiKey
-      value: AIzaSyC0Rd2B_e7FjBZ8ixDvQgBTkW_GPt2jmc8
+      value: AIzaSyBuSMn6fm8yFZsFS8Z0-RGMzQ35oolWuHE
       objectReference: {fileID: 0}
     - target: {fileID: 5451673311877118035, guid: 417c5af75b21ef24ca6f33c7590f00c8, type: 3}
       propertyPath: chatManager
@@ -18004,7 +18004,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6015506993103287062, guid: a66bfde88dbe0e846b45bc643b3e6124, type: 3}
       propertyPath: apiKey
-      value: AIzaSyC0Rd2B_e7FjBZ8ixDvQgBTkW_GPt2jmc8
+      value: AIzaSyBuSMn6fm8yFZsFS8Z0-RGMzQ35oolWuHE
       objectReference: {fileID: 0}
     - target: {fileID: 6015506993103287062, guid: a66bfde88dbe0e846b45bc643b3e6124, type: 3}
       propertyPath: TaskManager
@@ -18298,7 +18298,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7014161756123793519, guid: bb1101eed4b8da0409e07cf1255443fb, type: 3}
       propertyPath: apiKey
-      value: AIzaSyC0Rd2B_e7FjBZ8ixDvQgBTkW_GPt2jmc8
+      value: AIzaSyBuSMn6fm8yFZsFS8Z0-RGMzQ35oolWuHE
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -25283,7 +25283,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ConversationManager
   enableFeedback: 1
-  activeFeedbackTypes: 8
+  activeFeedbackTypes: 0
   ttsManager: {fileID: 125023358}
   taskManager: {fileID: 388610424}
   visualCuePrefab: {fileID: 1134121329}
@@ -33059,7 +33059,9 @@ MonoBehaviour:
   avatarAnimator: {fileID: 7201220261026691480}
   talkingParameterName: IsTalking
   thinkingParameterName: IsThinking
-  thinkingClips: []
+  thinkingClips:
+  - {fileID: -203655887218126122, guid: 7bc0e0ed3c2c69643a3971877830ae00, type: 3}
+  - {fileID: 7400000, guid: 6627b94998091cc4cb66b4df67661f68, type: 2}
 --- !u!82 &7201220261026691476
 AudioSource:
   m_ObjectHideFlags: 0

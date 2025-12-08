@@ -202,11 +202,7 @@ namespace GoogleSpeechToText.Scripts
                 return;
             }
 
-            // Trigger feedback IMMEDIATELY when recording stops (before STT processing)
-            if (conversationManager != null)
-            {
-                conversationManager.TriggerFeedback("");
-            }
+            conversationManager.TriggerFeedback("");
 
             var samples = new float[position * clip.channels];
             clip.GetData(samples, 0);
