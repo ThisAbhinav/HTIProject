@@ -86,7 +86,12 @@ public class SessionConfiguration : MonoBehaviour
         { "P17", new[] { 1, 2, 3, 4 } },
         { "P18", new[] { 2, 3, 4, 1 } },
         { "P19", new[] { 3, 4, 1, 2 } },
-        { "P20", new[] { 4, 1, 2, 3 } }
+        { "P20", new[] { 4, 1, 2, 3 } },
+        { "P21", new[] { 1, 2, 3, 4 } }, // Baseline, Gestures, Visual, Verbal
+        { "P22", new[] { 2, 3, 4, 1 } }, // Gestures, Visual, Verbal, Baseline
+        { "P23", new[] { 3, 4, 1, 2 } }, // Visual, Verbal, Baseline, Gestures
+        { "P24", new[] { 4, 1, 2, 3 } }, // Verbal, Baseline, Gestures, Visual
+        
     };
 
     private string[] feedbackTypeNames = new string[] { "", "Baseline", "Gestures", "Visual", "Verbal" };

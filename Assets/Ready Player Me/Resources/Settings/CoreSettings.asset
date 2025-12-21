@@ -15,5 +15,5 @@ MonoBehaviour:
   Subdomain: hti
   AppId: 68c17d16d5a3818bc37ec53f
   EnableLogging: 0
-  EnableAnalytics: 0
+  EnableAnalytics: 1
   BodyType: 1
